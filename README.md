@@ -52,7 +52,9 @@
 
 > 运行环境：**Windows 10 / 11 x64、.NET Framework 4.8、Microsoft Edge WebView2 Runtime、支持 WebGL 2 的显卡**。普通使用不需要 Node.js 或 .NET SDK。缺少 WebView2 时，请安装 [微软官方运行时](https://developer.microsoft.com/microsoft-edge/webview2/)。
 
-## 托盘与偏好设置
+## 深色窗口与偏好设置
+
+![体验窗口的深色原生标题栏](docs/images/window.jpg)
 
 双击启动程序**不会自动开启开机启动**。安装后可勾选「登录 Windows 时启动托盘」，只启动后台托盘，不自动打开画面或播放音乐。
 
