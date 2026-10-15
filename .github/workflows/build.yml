@@ -20,6 +20,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Build Windows application
+        shell: powershell
         run: npm run build
       - name: Verify isolated settings persistence
         shell: powershell
