@@ -1,0 +1,23 @@
+name: 问题反馈
+description: 报告启动、画面、安装或电台问题
+title: '[问题] '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题与复现步骤
+      description: 描述你做了什么、期望发生什么，以及实际结果。
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      placeholder: Windows 11 / NEXUS 1.1 / 分辨率 / 缩放比例 / 显卡
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 截图或相关日志
+      description: 请先删去用户名、本机路径及其他个人信息。电台问题请提供电台名称。

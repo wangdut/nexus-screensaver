@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#060b11">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https:; media-src https: blob:; object-src 'none'; base-uri 'none'">
+  <title>NEXUS · 星核实验室</title>
+  <link rel="icon" type="image/x-icon" href="nexus.ico">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="radio.css">
+</head>
+<body>
+  <main id="app">
+    <div id="universe" role="img" aria-label="可交互的三维粒子宇宙：移动鼠标扰动粒子，按住蓄积引力，释放产生涟漪。"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="frame-corner corner-tl" aria-hidden="true"></div>
+    <div class="frame-corner corner-br" aria-hidden="true"></div>
+
+    <header class="header hud">
+      <a class="brand" href="#" aria-label="NEXUS 星核实验室">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 2 36 11v18L20 38 4 29V11Z" stroke="currentColor"/><path d="m12 27 8-19 8 19M15 21h10M4 11l32 18M36 11 4 29" stroke="currentColor" stroke-opacity=".6"/></svg>
+        <span><strong>NEXUS<span class="brand-dot">.</span></strong><small>星 核 实 验 室</small></span>
+      </a>
+      <div class="header-center"><span class="live-dot"></span> INTERACTIVE AMBIENCE <span class="header-divider">/</span> <span id="fps">—</span> FPS</div>
+      <nav class="header-actions" aria-label="视图工具">
+        <button class="icon-button" id="radioButton" aria-label="打开音乐电台" title="音乐电台">♫</button>
+        <button class="icon-button" id="settingsButton" aria-label="打开应用设置" title="应用设置">⚙</button>
+        <button class="icon-button" id="helpButton" aria-label="操作指南" title="操作指南 [?]">?</button>
+        <button class="icon-button" id="zenButton" aria-label="进入纯净模式" title="纯净模式 [H]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5M4 15v5h5m6 0h5v-5"/><circle cx="12" cy="12" r="2"/></svg>
+        </button>
+        <button class="icon-button" id="fullscreenButton" aria-label="切换全屏" title="全屏 [F]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <section class="intro hud" aria-labelledby="headline">
+      <div class="eyebrow"><span id="sceneNumber">01</span><span class="short-line"></span><span id="sceneEnglish">QUANTUM CORE</span></div>
+      <h1 id="headline">让引力，<br><span>回应你。</span></h1>
+      <p id="sceneDescription">每一次靠近，都让宇宙泛起涟漪。<br>在指尖，创造属于你的秩序。</p>
+      <div class="interaction-hint"><span class="mouse-symbol" aria-hidden="true"></span><span>移动以扰动 <i>·</i> 长按以蓄能</span></div>
+    </section>
+
+    <aside class="controls hud" aria-label="场域控制">
+      <div class="panel-heading"><span>场域控制</span><span class="tiny-cross" aria-hidden="true">+</span></div>
+      <label class="range-label" for="gravity"><span>引力强度</span><output id="gravityValue">65<span>%</span></output></label>
+      <input type="range" id="gravity" min="10" max="100" value="65">
+      <label class="range-label" for="speed"><span>演化速度</span><output id="speedValue">1.0<span>×</span></output></label>
+      <input type="range" id="speed" min="2" max="20" value="10">
+      <div class="palette-row"><span>光谱</span><div class="palettes" role="group" aria-label="粒子光谱">
+        <button class="swatch ice selected" data-palette="ice" aria-label="冰川青" aria-pressed="true"></button>
+        <button class="swatch violet" data-palette="violet" aria-label="星云紫" aria-pressed="false"></button>
+        <button class="swatch ember" data-palette="ember" aria-label="日冕金" aria-pressed="false"></button>
+      </div></div>
+      <div class="control-divider"></div>
+      <label class="toggle-label" for="autoplay"><span>自动漫游</span><input type="checkbox" id="autoplay" checked><span class="toggle-track" aria-hidden="true"></span></label>
+      <div class="quality-row"><span>渲染</span><button id="qualityButton" title="切换：自动 / 精细 / 节能">自动 <span>↗</span></button></div>
+    </aside>
+
+    <div class="orbit-caption hud" aria-hidden="true"><span class="caption-dot"></span><span id="fieldCaption">Q–01 / 涌动的秩序</span><span class="caption-line"></span></div>
+
+    <div class="bottom hud">
+      <div class="clock-block"><time id="clock">00:00</time><span id="date">THU / OCT 15</span></div>
+      <nav class="scene-dock" aria-label="选择粒子形态">
+        <button class="scene-button active" data-scene="0" aria-pressed="true"><span class="scene-icon core-icon" aria-hidden="true"></span><span><small>01 / CORE</small><strong>量子星核</strong></span></button>
+        <button class="scene-button" data-scene="1" aria-pressed="false"><span class="scene-icon ring-icon" aria-hidden="true"></span><span><small>02 / ORBIT</small><strong>引力星环</strong></span></button>
+        <button class="scene-button" data-scene="2" aria-pressed="false"><span class="scene-icon gate-icon" aria-hidden="true"></span><span><small>03 / WARP</small><strong>时空之门</strong></span></button>
+        <button id="pauseButton" class="pause-button" aria-label="暂停演化" aria-pressed="false" title="暂停 [空格]"><span id="pauseIcon">Ⅱ</span></button>
+      </nav>
+      <div class="keyboard-hints"><span><kbd>H</kbd> 纯净模式</span><span><kbd>ESC</kbd> 退出全屏</span></div>
+    </div>
+
+    <button class="zen-exit" id="zenExit" hidden>显示界面 <kbd>H</kbd></button>
+    <div class="charge-indicator" id="chargeIndicator" aria-hidden="true"><svg viewBox="0 0 64 64"><circle class="charge-track" cx="32" cy="32" r="26"/><circle id="chargeArc" cx="32" cy="32" r="26"/></svg><span>引力蓄积</span></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <dialog id="helpDialog">
+      <button id="closeHelp" class="dialog-close" aria-label="关闭指南">×</button>
+      <span class="eyebrow">A LITTLE CURIOSITY GOES A LONG WAY</span>
+      <h2>宇宙，听你的。</h2>
+      <p>这里没有任务，只有探索。</p>
+      <dl><div><dt>移动指针</dt><dd>拨动粒子，改变局部引力</dd></div><div><dt>长按 · 释放</dt><dd>聚拢星尘，释放一圈能量波</dd></div><div><dt>拖动 / 触摸滑动</dt><dd>从不同角度观察粒子宇宙</dd></div><div><dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>在三种形态间自由变换</dd></div><div><dt><kbd>空格</kbd> / <kbd>H</kbd> / <kbd>F</kbd></dt><dd>暂停 / 纯净模式 / 全屏</dd></div><div><dt><kbd>Esc</kbd></dt><dd>关闭指南、退出全屏或退出屏保</dd></div></dl>
+      <button id="startExploring" class="primary-button">开始探索 <span>↗</span></button>
+    </dialog>
+    <aside id="audioDock" class="audio-dock" aria-label="音乐播放控制" hidden>
+      <button id="miniPlay" aria-label="播放电台">▶</button><div class="mini-track"><button id="miniStation">星际电台</button><small id="miniStatus">已停止播放</small></div>
+      <button id="miniMute" aria-pressed="false" title="静音 / 取消静音 [M]">声音</button><input id="miniVolume" type="range" min="0" max="100" value="35" aria-label="音乐音量">
+    </aside>
+    <dialog id="radioDialog" aria-labelledby="radioHeading">
+      <button id="closeRadio" class="dialog-close" aria-label="关闭音乐电台">×</button>
+      <span class="eyebrow">NEXUS / INTERSTELLAR RADIO</span><h2 id="radioHeading">给星空，一点声音。</h2>
+      <p>中文音乐优先 · Radio Browser 电台目录</p>
+      <form id="radioSearchForm" class="radio-search"><input id="radioQuery" maxlength="64" placeholder="搜索名称，如：音乐、CNR、古典" aria-label="搜索电台名称"><button type="submit" id="radioSearchButton">搜索</button><button type="button" id="favoritesButton" aria-pressed="false">收藏</button></form>
+      <p id="directoryStatus" role="status">打开后获取电台目录，播放需要联网。</p>
+      <div id="stationList" class="station-list" aria-label="电台列表"></div>
+      <section class="radio-player" aria-label="播放器">
+        <strong id="nowStation">选择一个电台，给星空一点声音</strong><p id="radioStatus" role="status" aria-live="polite">尚未播放</p>
+        <div class="radio-playback"><button id="radioPlay">播放电台</button><button id="radioMute" aria-pressed="false">静音</button><label for="radioVolume">音量 <output id="radioVolumeValue">35%</output></label><input id="radioVolume" type="range" min="0" max="100" value="35"></div>
+        <label class="music-auto"><input id="musicAuto" type="checkbox">屏保启动时播放上次电台</label>
+      </section>
+      <p class="radio-note">电台内容由广播方提供，可能含主持或广告；不可用时可换台重试。纯净模式下仍可调节音量，M 快速静音。</p>
+    </dialog>
+    <section id="fallback" hidden role="alert"><h2>星核暂时无法点亮</h2><p>需要支持 WebGL 2 的显卡与驱动。请开启浏览器硬件加速，或更新显卡驱动后再试。</p></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

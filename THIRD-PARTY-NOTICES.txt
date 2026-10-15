@@ -1,0 +1,15 @@
+NEXUS uses Three.js r170 (MIT) and Microsoft Edge WebView2 SDK 1.0.2903.40.
+NEXUS also uses hls.js 1.6.13 (Apache-2.0) for HLS radio playback.
+hls.js: https://github.com/video-dev/hls.js/tree/v1.6.13
+Three.js: https://github.com/mrdoob/three.js/blob/r170/LICENSE
+WebView2: https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.2903.40
+Copies of the applicable dependency license files are included in the licenses folder.
+The Microsoft Edge WebView2 Runtime is installed and licensed separately by Microsoft.
+
+Radio directory: Radio Browser community API, https://www.radio-browser.info/
+API documentation: https://docs.radio-browser.info/
+No API key is required. Directory queries and station click reporting are made only
+when radio features are used. Audio is streamed directly from each broadcaster.
+Radio Browser and broadcasters are independent services; their availability,
+programming, advertising and geographical restrictions may change.
+No audio content is redistributed in the NEXUS package.

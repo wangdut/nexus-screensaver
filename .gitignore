@@ -1,0 +1,23 @@
+node_modules/
+vendor/
+dist/
+.browser-profile/
+.test-profile/
+*.log
+
+# Releases are distributed through GitHub Releases, not Git history.
+/*.zip
+/*.zip.sha256
+/tests/*/
+/tests/*-results.json
+/tests/results.json
+/tests/live-stations.json
+/tests/probe-hls.cjs
+/screenshots/
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+.publish/
