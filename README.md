@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # NEXUS · 星核实验室
 
@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/wangdut/nexus-screensaver?color=5bc9c5)](https://github.com/wangdut/nexus-screensaver/releases/latest)
 [![Windows build](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml/badge.svg)](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml)
 
-[**下载 v1.1 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.1.0/NEXUS-Windows-x64-v1.1.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
+[**下载 v1.2 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.2.0/NEXUS-Windows-x64-v1.2.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
 
 ![NEXUS 量子星核：交互式粒子宇宙与屏保内播放器](docs/images/hero.jpg)
 
@@ -32,6 +32,9 @@
 
 ## 不止好看，也能日常使用
 
+- **统一深色窗口**：体验窗口和设置窗口的标题栏融入主题，保留拖动、缩放、最小化和系统贴边操作；全屏仍为无边框。
+- **可选一键更新**：设置页提示 GitHub 新版，可忽略、稍后再看或更新。网络不可达时跳过，现有功能正常。
+
 - **真正的 Windows 屏保**：支持闲置后全屏、多显示器、系统设置入口及嵌入式预览。
 - **随手可用的托盘**：通知区域图标，右键调整偏好、打开交互体验、立即屏保或退出。
 - **安装与卸载完整**：当前用户安装，无需管理员权限；支持控制面板卸载、开始菜单入口和保留偏好升级。
@@ -41,7 +44,7 @@
 
 ## 三步开始
 
-1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.1.zip**，完整解压。请不要下载 Source code 作为安装包。
+1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.2.zip**，完整解压。请不要下载 Source code 作为安装包。
 2. 双击 **Install.cmd**。安装完成后打开偏好设置，默认闲置 **5 分钟**启动屏保。
 3. 调整闲置时间、启动方式等选项并保存。想听音乐，进入体验画面，点击右上角 **♫** 选择电台。
 
@@ -107,7 +110,11 @@
 
 **在哪里卸载？** 安装后，在「控制面板 → 程序和功能」或「设置 → 应用」卸载 NEXUS，也可运行 Uninstall.cmd。移除应用与启动项；当前屏保仍为 NEXUS 时恢复原屏保。收藏和个人偏好保留。
 
-**怎样升级？** 完整解压新版本并运行 Install.cmd，保留闲置时间、屏保启用状态及偏好。
+**怎样升级？** v1.2 起，安装版可在设置页点击「立即更新」，完成下载和校验后自动重启。也可完整解压新版运行 Install.cmd。v1.1 尚无更新功能，第一次升级到 v1.2 需运行新版 Install.cmd。
+
+**旧版本会越积越多吗？** 新版先在临时目录准备并校验文件，再整体替换 App 程序目录；成功启动后清除旧程序、废弃文件和此次更新缓存。偏好、收藏、WebView 用户数据保存在程序目录之外。失败自动回退。自行下载到桌面或下载文件夹的 ZIP 不会被擅自删除。
+
+**访问不了 GitHub 怎么办？** 自动检查有超时，不弹阻塞提示；下载不完整、校验不通过或取消时保留当前版本。设置页可忽略某一版，手动检查可重新显示。不使用未经验证的第三方镜像。
 
 **为什么按键后进入锁屏？** 恢复时显示登录屏幕、休眠和组织策略由 Windows 管理。NEXUS 不修改锁屏策略，也不替代安全锁屏；需要持续互动时可使用体验窗口的全屏模式。
 
@@ -152,9 +159,11 @@ powershell -ExecutionPolicy Bypass -File tests/native-audio.ps1
 # 生成并检查完整发布包
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File tests/release.ps1
+powershell -ExecutionPolicy Bypass -File tests/updater.ps1
+powershell -ExecutionPolicy Bypass -File tests/desktop-upgrade.ps1
 ```
 
-**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。GitHub Actions 检查 Windows 构建、隔离设置与安装流程；图形桌面和实时电台测试在本地执行。
+**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。GitHub Actions 检查 Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
 
 ## 反馈与致谢
 

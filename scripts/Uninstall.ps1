@@ -8,6 +8,7 @@ $desktopKey=if($testMode){$TestRegistry+'\Desktop'}else{'HKCU:\Control Panel\Des
 $uninstallKey=if($testMode){$TestRegistry+'\Uninstall'}else{'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\NexusScreensaver'}
 $runKey=if($testMode){$TestRegistry+'\Run'}else{'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'}
 $backupPath=Join-Path $installRoot 'screensaver-backup.json'
+. (Join-Path $PSScriptRoot 'Deployment.ps1')
 if(!$Quiet -and !$testMode){Add-Type -AssemblyName System.Windows.Forms;if([System.Windows.Forms.MessageBox]::Show('卸载 NEXUS 并恢复安装前的屏保设置？个人偏好与收藏将保留。','卸载 NEXUS','YesNo','Question') -ne 'Yes'){exit}}
 if(!$testMode){Get-Process 'Nexus*' -ErrorAction SilentlyContinue|Where-Object{$_.Path -eq (Join-Path $appRoot 'Nexus.exe') -or $_.Path -eq (Join-Path $appRoot 'Nexus.scr')}|ForEach-Object{if(!$_.CloseMainWindow() -or !$_.WaitForExit(2500)){Stop-Process -Id $_.Id -ErrorAction SilentlyContinue}}}
 $current=Get-ItemProperty -LiteralPath $desktopKey
@@ -29,4 +30,6 @@ if(Test-Path -LiteralPath $appRoot){$resolved=(Get-Item -LiteralPath $appRoot).F
 if(!$testMode){$shortcutRoot=Join-Path ([Environment]::GetFolderPath('StartMenu')) 'Programs\NEXUS 星核实验室';if(Test-Path -LiteralPath $shortcutRoot){$resolved=(Get-Item -LiteralPath $shortcutRoot).FullName;if($resolved -eq [IO.Path]::GetFullPath($shortcutRoot)){Remove-Item -LiteralPath $resolved -Recurse -Force}}}
 if(Test-Path -LiteralPath $uninstallKey){Remove-Item -LiteralPath $uninstallKey -Recurse -Force}
 if(Test-Path -LiteralPath $backupPath){Remove-Item -LiteralPath $backupPath -Force}
+foreach($folder in @('App.new','App.previous','Updates','HealthCheck')){Remove-NexusManagedDirectory (Join-Path $installRoot $folder) $installRoot}
+Remove-Item -LiteralPath (Join-Path $installRoot 'update-result.json') -Force -ErrorAction SilentlyContinue
 Write-Output 'NEXUS uninstalled. Preferences and favorites have been retained.'

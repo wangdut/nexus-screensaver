@@ -18,6 +18,7 @@ namespace Nexus
         internal static readonly string Data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NexusScreensaver");
         internal static bool Smoke;
         internal static bool RadioSmoke;
+        internal static bool UpdateHealth;
         internal static readonly List<UniverseForm> Windows = new List<UniverseForm>();
         [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
         [DllImport("user32.dll")] private static extern IntPtr GetWindowDpiAwarenessContext(IntPtr window);
@@ -34,7 +35,8 @@ namespace Nexus
             AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs e) { Log(e.ExceptionObject as Exception); };
             string first = args.Length > 0 ? args[0].ToLowerInvariant() : "";
             string mode = first.Split(':')[0];
-            RadioSmoke=mode=="--radio-smoke";Smoke = mode == "--smoke-test" || RadioSmoke;
+            UpdateHealth=mode=="--update-healthcheck";
+            RadioSmoke=mode=="--radio-smoke";Smoke = mode == "--smoke-test" || RadioSmoke || UpdateHealth;
             try
             {
                 if (mode == "--shutdown") { TrayContext.Signal("quit"); return; }
@@ -83,7 +85,7 @@ namespace Nexus
         }
     }
 
-    internal class UniverseForm : Form
+    internal class UniverseForm : ThemedForm
     {
         private readonly WebView2 web = new WebView2();
         private readonly bool saver;
@@ -165,7 +167,7 @@ namespace Nexus
                 string site = Path.Combine(Program.Root, "web");
                 if (!File.Exists(Path.Combine(site, "index.html"))) throw new FileNotFoundException("缺少 web 文件夹，请完整解压 NEXUS 发布包。");
                 // Same origin and profile preserve preferences between explorer and screensaver.
-                CoreWebView2Environment environment = await CoreWebView2Environment.CreateAsync(null, Program.RadioSmoke?Path.Combine(Program.Root,"radio-test-profile"):Path.Combine(Program.Data, "WebView"), new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required"));
+                CoreWebView2Environment environment = await CoreWebView2Environment.CreateAsync(null, Program.UpdateHealth?Path.Combine(Directory.GetParent(Program.Root.TrimEnd('\\')).FullName,"HealthCheck"):Program.RadioSmoke?Path.Combine(Program.Root,"radio-test-profile"):Path.Combine(Program.Data, "WebView"), new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required"));
                 await web.EnsureCoreWebView2Async(environment);
                 web.CoreWebView2.SetVirtualHostNameToFolderMapping("nexus.local", site, CoreWebView2HostResourceAccessKind.DenyCors);
                 web.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
@@ -192,6 +194,7 @@ namespace Nexus
                         if (parent == IntPtr.Zero) web.Focus();
                         if (Program.Smoke)
                         {
+                            if(Program.UpdateHealth){smokeTimer.Stop();Close();return;}
                             if(Program.RadioSmoke){await TestRadio();return;}
                             smokeTimer.Stop(); await Task.Delay(2500);
                             string state = await web.CoreWebView2.ExecuteScriptAsync("JSON.stringify(window.nexus.getState())");
@@ -206,7 +209,7 @@ namespace Nexus
                     Program.Log(new Exception("WebView2 process: " + e.ProcessFailedKind));
                     if (e.ProcessFailedKind == CoreWebView2ProcessFailedKind.BrowserProcessExited) { if (saver) Program.ExitAll(); else Close(); }
                 };
-                string query = parent != IntPtr.Zero ? "?preview=1" : saver ? "?screensaver=1" : "";
+                string query = parent != IntPtr.Zero || Program.UpdateHealth ? "?preview=1" : saver ? "?screensaver=1" : "";
                 if(saver){query+="&audio="+(audioOwner?"1":"0")+"&pure="+(Preferences.GetBool("PureMode",true)?"1":"0");}
                 web.CoreWebView2.Navigate("https://nexus.local/index.html" + query);
             }

@@ -29,7 +29,7 @@ try {
  [void]$results.Add(@{test='Background startup retains tray without opening window';pass=$true})
  $settings=Start-Process -FilePath $exe -ArgumentList '--settings' -WindowStyle Hidden -PassThru
  if(!$settings.WaitForExit(4000)){throw 'Second launch did not hand off to primary instance'}
- Start-Sleep -Milliseconds 700
+ Start-Sleep -Milliseconds 11000
  $window=[NexusTrayTest]::Find($app.Id,'设置')
  if($window -eq [IntPtr]::Zero){throw 'Settings event failed'}
  [void]$results.Add(@{test='Single instance forwards settings request';pass=$true})
@@ -39,9 +39,13 @@ try {
  [void][NexusTrayTest]::PostMessage($window,0x10,[IntPtr]::Zero,[IntPtr]::Zero)
  $explore=Start-Process -FilePath $exe -ArgumentList '/window' -WindowStyle Hidden -PassThru
  if(!$explore.WaitForExit(4000)){throw 'Explorer duplicate process did not exit'}
- Start-Sleep -Milliseconds 1800
+ Start-Sleep -Milliseconds 6500
  $window=[NexusTrayTest]::Find($app.Id,'星核')
  if($window -eq [IntPtr]::Zero){throw 'Explorer did not open from tray'}
+ $rect=New-Object NexusTrayTest+Rect;[void][NexusTrayTest]::GetWindowRect($window,[ref]$rect)
+ $bitmap=New-Object Drawing.Bitmap ($rect.Right-$rect.Left),($rect.Bottom-$rect.Top)
+ $graphics=[Drawing.Graphics]::FromImage($bitmap);$dc=$graphics.GetHdc();[void][NexusTrayTest]::PrintWindow($window,$dc,2);$graphics.ReleaseHdc($dc);$bitmap.Save((Join-Path (Get-Location).Path 'screenshots\window-v1.2.png'));$graphics.Dispose();$bitmap.Dispose()
+
  [void][NexusTrayTest]::PostMessage($window,0x10,[IntPtr]::Zero,[IntPtr]::Zero)
  Start-Sleep -Milliseconds 600;$app.Refresh()
  if($app.HasExited){throw 'Tray exited when experience window closed'}
