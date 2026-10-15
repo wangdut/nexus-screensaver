@@ -4,15 +4,18 @@ const $=id=>document.getElementById(id);
 const native=Boolean(window.chrome?.webview);
 const params=new URLSearchParams(location.search);
 const canPlay=!params.has('preview')&&params.get('audio')!=='0';
-const audio=new Audio();audio.preload='none';
+let audio=new Audio();audio.preload='none';
 let prefs={volume:35,muted:false,station:null,favorites:[],auto:false};
 try{prefs={...prefs,...JSON.parse(localStorage.getItem('nexus.radio.v1')||'{}')};}catch{}
 prefs.volume=Math.max(0,Math.min(100,Number(prefs.volume)||0));
 prefs.favorites=Array.isArray(prefs.favorites)?prefs.favorites.filter(validStation).slice(0,100):[];
 if(!validStation(prefs.station))prefs.station=null;
-let stations=[],hls=null,generation=0,timeout=null,playing=false,busy=false,onlyFavorites=false,requestNumber=0,searchNumber=0,clickReported=false;
+let stations=[],hls=null,generation=0,timeout=null,retryTimer=null,playing=false,busy=false,onlyFavorites=false,requestNumber=0,searchNumber=0,clickReported=false,retries=0,lastError=null;
 const pending=new Map();
 function validStation(s){try{return s&&typeof s.name==='string'&&typeof s.id==='string'&&new URL(s.url).protocol==='https:';}catch{return false;}}
+function isHls(s){if(/\.m3u8(?:[?#]|$)/i.test(s.url))return true;if(/\.(?:mp3|aac|ogg|opus|wav)(?:[?#]|$)/i.test(s.url))return false;return s.hls===true||s.hls===1||s.hls==='1'||s.hls==='true';}
+function normalizeStation(s){return {...s,hls:isHls(s)};}
+function fromDirectory(s){return normalizeStation({id:s.stationuuid,name:s.name,url:s.url_resolved||s.url,language:s.language,tags:s.tags,hls:s.hls});}
 function save(){try{localStorage.setItem('nexus.radio.v1',JSON.stringify(prefs));}catch{}}
 function host(action,extra={}){
   return new Promise((resolve,reject)=>{const id='radio-'+(++requestNumber);const timer=setTimeout(()=>{pending.delete(id);reject(new Error('请求超时，请重试。'));},30000);pending.set(id,{resolve,reject,timer});window.chrome.webview.postMessage(JSON.stringify({id,action,...extra}));});
@@ -32,28 +35,50 @@ function controls(){
   $('radioPlay').disabled=!prefs.station||!canPlay;
 }
 function release(){if(native)host('audioRelease').catch(()=>{});}
-function unload(){clearTimeout(timeout);timeout=null;audio.pause();if(hls){hls.destroy();hls=null;}audio.removeAttribute('src');audio.load();playing=false;busy=false;}
+function unload(){clearTimeout(timeout);clearTimeout(retryTimer);timeout=retryTimer=null;audio.onplaying=audio.onwaiting=audio.onerror=audio.onended=null;audio.pause();if(hls){hls.destroy();hls=null;}audio.removeAttribute('src');audio.load();playing=false;busy=false;}
 function stop(message='已停止播放'){generation++;unload();release();setStatus(message);controls();}
 function fail(message){generation++;unload();release();setStatus(message);controls();}
+async function refreshStation(station){
+  const fresh=native?await host('radioResolve',{station:station.id}):fromDirectory((await api('/json/stations/byuuid/'+encodeURIComponent(station.id)))[0]||{});
+  return validStation(fresh)&&fresh.id===station.id?normalizeStation(fresh):station;
+}
+function rememberStation(station){prefs.station=normalizeStation(station);prefs.favorites=prefs.favorites.map(s=>s.id===station.id?prefs.station:s);save();}
 async function play(station=prefs.station){
   if(!canPlay){setStatus('当前为预览或副屏，请在主屏播放。');return;}
   if(!validStation(station))return;
-  const token=++generation;unload();clickReported=false;prefs.station={id:station.id,name:station.name,url:station.url,hls:Boolean(station.hls),language:station.language||'',tags:station.tags||''};save();busy=true;setStatus('连接中…');controls();
-  if(native){try{const granted=await host('audioAcquire');if(token!==generation)return;if(!granted){fail('另一个 NEXUS 窗口正在播放，请先停止那里的音乐。');return;}}catch{fail('无法取得播放器，请重试。');return;}}
+  const token=++generation;unload();clickReported=false;retries=0;lastError=null;rememberStation(station);busy=true;setStatus('连接中…');controls();
+  if(native){try{const granted=await host('audioAcquire');if(token!==generation)return;if(!granted){fail('另一个 NEXUS 窗口正在播放，请先停止那里的音乐。');return;}}catch{if(token===generation)fail('无法取得播放器，请重试。');return;}}
   if(token!==generation)return;
-  timeout=setTimeout(()=>{if(token===generation)fail('连接超时，请换台或重试。');},18000);
-  const start=async()=>{try{await audio.play();if(token!==generation)return;}catch(error){if(token===generation&&error.name!=='AbortError')fail(error.name==='NotAllowedError'?'点击播放即可开始收听。':'无法播放该电台，请尝试另一台。');}};
-  if(station.hls||/\.m3u8(?:\?|$)/i.test(station.url)){
-    if(Hls.isSupported()){
-      hls=new Hls({enableWorker:false,backBufferLength:15,maxBufferLength:20,maxMaxBufferLength:30});hls.attachMedia(audio);hls.on(Hls.Events.MEDIA_ATTACHED,()=>{if(token===generation)hls?.loadSource(station.url);});hls.on(Hls.Events.MANIFEST_PARSED,start);hls.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal&&token===generation)fail('电台流暂不可用，请换台或稍后重试。');});
-    }else if(audio.canPlayType('application/vnd.apple.mpegurl')){audio.src=station.url;start();}
-    else fail('此设备不支持该电台格式，请选择其他电台。');
-  }else{audio.src=station.url;start();}
+  connect(prefs.station,token);
 }
-audio.addEventListener('playing',()=>{clearTimeout(timeout);busy=false;playing=true;setStatus(prefs.muted?'正在播放 · 已静音':'正在播放 · LIVE');controls();if(!clickReported){clickReported=true;if(native)host('radioClick',{station:prefs.station.id}).catch(()=>{});else api('/json/url/'+encodeURIComponent(prefs.station.id)).catch(()=>{});}});
-audio.addEventListener('waiting',()=>{if(playing||busy){setStatus('缓冲中…');clearTimeout(timeout);const token=generation;timeout=setTimeout(()=>{if(token===generation)fail('电台连接中断，请重试或换台。');},18000);}});
-audio.addEventListener('error',()=>{if(audio.hasAttribute('src'))fail('连接中断或格式不支持，请换台重试。');});
-audio.addEventListener('ended',()=>stop('直播已结束，请选择其他电台。'));
+function connect(station,token){
+  if(token!==generation)return;
+  unload();const media=audio=new Audio();media.preload='none';busy=true;controls();let recovering=false;
+  const active=()=>token===generation&&audio===media&&!recovering;
+  const recover=async(reason,details)=>{
+    if(!active())return;recovering=true;lastError={reason,details};unload();
+    if(retries>=2){fail('该电台暂时无法连接，已重试 2 次；可点击播放重试或选择其他电台。');return;}
+    retries++;busy=true;setStatus('正在恢复连接（'+retries+'/2）…');controls();
+    let next=station;
+    // Refresh a saved URL once; directory outages must not prevent retrying the original stream.
+    if(retries===1){try{next=await refreshStation(station);}catch{}}
+    if(token!==generation)return;
+    rememberStation(next);controls();retryTimer=setTimeout(()=>connect(next,token),700);
+  };
+  const armTimeout=()=>{clearTimeout(timeout);timeout=setTimeout(()=>recover('timeout','No playable audio within 18 seconds'),18000);};
+  media.onplaying=()=>{if(!active())return;clearTimeout(timeout);busy=false;playing=true;lastError=null;setStatus(prefs.muted?'正在播放 · 已静音':'正在播放 · LIVE');controls();if(!clickReported){clickReported=true;if(native)host('radioClick',{station:station.id}).catch(()=>{});else api('/json/url/'+encodeURIComponent(station.id)).catch(()=>{});}};
+  media.onwaiting=()=>{if(active()){setStatus('缓冲中…');armTimeout();}};
+  media.onerror=()=>{if(active())recover('media',{code:media.error?.code,message:media.error?.message||''});};
+  media.onended=()=>{if(active())recover('ended','Live stream ended');};
+  armTimeout();
+  const start=async()=>{if(!active())return;try{await media.play();}catch(error){if(!active()||error.name==='AbortError')return;if(error.name==='NotAllowedError')fail('点击播放即可开始收听。');else recover('play',error.name);}};
+  if(isHls(station)){
+    if(Hls.isSupported()){
+      const engine=hls=new Hls({enableWorker:false,backBufferLength:15,maxBufferLength:20,maxMaxBufferLength:30});engine.on(Hls.Events.MEDIA_ATTACHED,()=>{if(active())engine.loadSource(station.url);});engine.on(Hls.Events.MANIFEST_PARSED,start);engine.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal&&active())recover('hls',data.details);});engine.attachMedia(media);
+    }else if(media.canPlayType('application/vnd.apple.mpegurl')){media.src=station.url;start();}
+    else fail('此设备不支持该电台格式，请选择其他电台。');
+  }else{media.src=station.url;start();}
+}
 function mute(){prefs.muted=!prefs.muted;save();controls();if(playing)setStatus(prefs.muted?'正在播放 · 已静音':'正在播放 · LIVE');}
 function volume(event){prefs.volume=Number(event.target.value);save();controls();}
 function renderList(){
@@ -71,8 +96,8 @@ async function search(query=''){
   const token=++searchNumber;onlyFavorites=false;$('favoritesButton').setAttribute('aria-pressed','false');$('radioSearchButton').disabled=true;$('directoryStatus').textContent='正在查找电台…';
   try{
     if(native){const response=await host('radioSearch',{query});if(token!==searchNumber)return;stations=response;}
-    else{const data=await api('/json/stations/search?hidebroken=true&order=clickcount&reverse=true&limit=80&name='+encodeURIComponent(query.trim()||'音乐'));if(token!==searchNumber)return;stations=data.map(s=>({id:s.stationuuid,name:s.name,url:s.url_resolved,language:s.language,tags:s.tags,hls:Boolean(s.hls)})).filter(validStation);stations=[...new Map(stations.map(s=>[s.url,s])).values()];}
-    if(token!==searchNumber)return;stations=stations.filter(validStation);renderList();$('directoryStatus').textContent=stations.length+' 个电台 · 优先中文音乐 · 仅显示 HTTPS 音源';
+    else{const data=await api('/json/stations/search?hidebroken=true&order=clickcount&reverse=true&limit=80&name='+encodeURIComponent(query.trim()||'音乐'));if(token!==searchNumber)return;stations=data.map(fromDirectory).filter(validStation);stations=[...new Map(stations.map(s=>[s.url,s])).values()];}
+    if(token!==searchNumber)return;stations=stations.filter(validStation).map(normalizeStation);renderList();$('directoryStatus').textContent=stations.length+' 个电台 · 优先中文音乐 · 仅显示 HTTPS 音源';
     try{localStorage.setItem('nexus.radio.cache',JSON.stringify({at:Date.now(),stations}));}catch{}
   }catch(error){if(token!==searchNumber)return;try{const cache=JSON.parse(localStorage.getItem('nexus.radio.cache')||'null');if(cache){stations=cache.stations.filter(validStation);renderList();$('directoryStatus').textContent='目录离线 · 显示 '+new Date(cache.at).toLocaleDateString()+' 缓存，播放仍需联网';}else throw error;}catch{$('directoryStatus').textContent='电台目录连接失败，请稍后重试。';renderList();}}
   finally{if(token===searchNumber)$('radioSearchButton').disabled=false;}
@@ -88,6 +113,6 @@ $('radioDialog').addEventListener('close',()=>{$('radioButton').focus();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('radioDialog').open){event.preventDefault();event.stopImmediatePropagation();$('radioDialog').close();}else if(event.key.toLowerCase()==='m'&&!event.target.matches('input,select,textarea')){mute();}},true);
 if(native){$('settingsButton').addEventListener('click',()=>window.chrome.webview.postMessage('settings'));host('preferences').then(p=>{prefs.auto=p.musicAuto;save();controls();if(canPlay&&params.has('screensaver')&&prefs.auto&&prefs.station)play();}).catch(()=>{});}else{$('settingsButton').addEventListener('click',()=>{setStatus('系统设置请在 Windows 体验版或托盘中打开。');open();});}
 if(!canPlay){$('radioButton').hidden=true;$('audioDock').hidden=true;}
-window.addEventListener('pagehide',()=>{unload();release();});
-window.nexusRadio={stop,getState:()=>({station:prefs.station,volume:prefs.volume,muted:prefs.muted,auto:prefs.auto,playing,busy,favorites:prefs.favorites.length,stations:stations.length,currentTime:audio.currentTime,readyState:audio.readyState}),open};
+window.addEventListener('pagehide',()=>{generation++;unload();release();});
+window.nexusRadio={stop,getState:()=>({station:prefs.station,volume:prefs.volume,muted:prefs.muted,auto:prefs.auto,playing,busy,favorites:prefs.favorites.length,stations:stations.length,currentTime:audio.currentTime,readyState:audio.readyState,retries,lastError}),open};
 controls();setStatus('音乐默认关闭 · 选择电台后点击播放');

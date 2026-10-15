@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/wangdut/nexus-screensaver?color=5bc9c5)](https://github.com/wangdut/nexus-screensaver/releases/latest)
 [![Windows build](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml/badge.svg)](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml)
 
-[**下载 v1.2 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.2.0/NEXUS-Windows-x64-v1.2.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
+[**下载 v1.2.1 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.2.1/NEXUS-Windows-x64-v1.2.1.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
 
 ![NEXUS 量子星核：交互式粒子宇宙与屏保内播放器](docs/images/hero.jpg)
 
@@ -44,7 +44,7 @@
 
 ## 三步开始
 
-1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.2.zip**，完整解压。请不要下载 Source code 作为安装包。
+1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.2.1.zip**，完整解压。请不要下载 Source code 作为安装包。
 2. 双击 **Install.cmd**。安装完成后打开偏好设置，默认闲置 **5 分钟**启动屏保。
 3. 调整闲置时间、启动方式等选项并保存。想听音乐，进入体验画面，点击右上角 **♫** 选择电台。
 
@@ -67,6 +67,8 @@
 截图为便携体验状态，安装后即可启用系统屏保与登录自启动选项。
 
 ## 星际电台
+
+**1.2.1 播放修复**：连接失败时按电台 UUID 刷新音源，并最多重试两次；停止或切台会取消旧任务，避免旧错误中断新播放。收藏、音量和静音状态保留。若该台持续不可用，请换台；不会擅自切换到其他节目。
 
 通过 [Radio Browser](https://www.radio-browser.info/) 公共 API 获取电台，无需申请密钥。默认优先展示中文音乐，可搜索电台名称、收藏常听频道，并记住音量与静音状态。
 
@@ -150,6 +152,7 @@ npm run dev
 # 开发服务器运行时，在另一终端检查网页
 npm test
 node tests/radio.cjs
+node tests/radio-recovery.cjs
 
 # Windows 系统集成检查
 powershell -ExecutionPolicy Bypass -File tests/settings.ps1

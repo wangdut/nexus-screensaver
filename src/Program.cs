@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -250,6 +250,7 @@ namespace Nexus
                 id=Convert.ToString(request["id"]);string action=Convert.ToString(request["action"]);object result=null;
                 if(action=="preferences") result=Preferences.Snapshot();
                 else if(action=="radioSearch") result=await RadioService.Search(request.ContainsKey("query")?Convert.ToString(request["query"]):"");
+                else if(action=="radioResolve") result=await RadioService.Resolve(Convert.ToString(request["station"]));
                 else if(action=="radioClick") {await RadioService.Click(Convert.ToString(request["station"]));result=true;}
                 else if(action=="audioAcquire") { result=AcquireAudio(); }
                 else if(action=="audioRelease") { ReleaseAudio();result=true; }

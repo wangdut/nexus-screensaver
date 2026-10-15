@@ -14,7 +14,7 @@ using Nexus;
 internal class UpdateTests
 {
     static List<object> results=new List<object>();
-    static byte[] package;static string checksum;static string name="NEXUS-Windows-x64-v1.2.zip";
+    static byte[] package;static string checksum;static string releaseVersion=UpdateService.Current.ToString(3);static string name="NEXUS-Windows-x64-v"+(releaseVersion.EndsWith(".0")?releaseVersion.Substring(0,releaseVersion.Length-2):releaseVersion)+".zip";
     static void Pass(string test){results.Add(new{test=test,pass=true});}
     static void Require(bool value,string text){if(!value)throw new Exception(text);}
     static void Reject(Action action,string label){try{action();}catch(InvalidDataException){Pass(label);return;}throw new Exception("Expected rejection: "+label);}
@@ -22,10 +22,10 @@ internal class UpdateTests
     static async Task Run(){
         string project=Directory.GetParent(Program.Root.TrimEnd('\\')).FullName;
         package=File.ReadAllBytes(Path.Combine(project,name));using(var sha=SHA256.Create())checksum=BitConverter.ToString(sha.ComputeHash(package)).Replace("-","")+"  "+name;
-        string url=UpdateService.Repository+"/releases/download/v1.2.0/"+name;
-        var payload=new{tag_name="v1.2.0",draft=false,prerelease=false,assets=new[]{new{name=name,browser_download_url=url,size=package.Length,digest="sha256:"+checksum.Split(' ')[0]},new{name=name+".sha256",browser_download_url=url+".sha256",size=94,digest=""}}};
-        string json=Preferences.Json.Serialize(payload);var offer=UpdateService.Parse(json,new Version(1,1,0,0));Require(offer!=null&&offer.Version==new Version(1,2,0,0),"New version not detected");Pass("Semantic newer stable release detected");
-        Require(UpdateService.Parse(json,new Version(1,2,0,0))==null,"Downgrade offered");Require(UpdateService.Parse(json.Replace("\"prerelease\":false","\"prerelease\":true"),new Version(1,1,0,0))==null,"Prerelease offered");Pass("Current, older and prerelease versions excluded");
+        string url=UpdateService.Repository+"/releases/download/v"+releaseVersion+"/"+name;
+        var payload=new{tag_name="v"+releaseVersion,draft=false,prerelease=false,assets=new[]{new{name=name,browser_download_url=url,size=package.Length,digest="sha256:"+checksum.Split(' ')[0]},new{name=name+".sha256",browser_download_url=url+".sha256",size=94,digest=""}}};
+        string json=Preferences.Json.Serialize(payload);var offer=UpdateService.Parse(json,new Version(1,1,0,0));Require(offer!=null&&offer.Version==UpdateService.Current,"New version not detected");Pass("Semantic newer stable release detected");
+        Require(UpdateService.Parse(json,UpdateService.Current)==null,"Downgrade offered");Require(UpdateService.Parse(json.Replace("\"prerelease\":false","\"prerelease\":true"),new Version(1,1,0,0))==null,"Prerelease offered");Pass("Current, older and prerelease versions excluded");
         Reject(()=>UpdateService.Parse(json.Replace("github.com/wangdut/","example.com/wangdut/"),new Version(1,1,0,0)),"Foreign update sources rejected");
         UpdateService.VerifyHash(package,checksum,"",name);Pass("Valid ZIP checksum accepted");
         Reject(()=>UpdateService.VerifyHash(new byte[]{1,2,3},checksum,"",name),"Corrupt or truncated downloads rejected");

@@ -18,7 +18,7 @@ const fs=require('node:fs/promises');const assert=require('node:assert/strict');
   let streamed=false;
   for(let index=0;index<4;index++){
    await click('.station-row:nth-child('+(index+1)+') .station-select');
-   try{await until('nexusRadio.getState().playing',19);streamed=true;break;}catch{}
+   try{await until('nexusRadio.getState().playing',19);const before=(await evaluate('nexusRadio.getState()')).currentTime;await wait(5000);assert.ok((await evaluate('nexusRadio.getState()')).currentTime>before+3);streamed=true;break;}catch{}
   }
   assert.ok(streamed,'No live station decoded successfully');
   results.push({test:'Real internet audio decoded and played muted',pass:true,station:(await evaluate('nexusRadio.getState()')).station});

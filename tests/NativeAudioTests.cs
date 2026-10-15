@@ -45,6 +45,13 @@ internal static class NativeAudioTests
                 await CheckStream(web,"ecbe92bf-a35b-439f-8bcf-55da0ece14ee","BRTV北京音乐广播","https://brtv-radiolive.rbc.cn/alive/fm974.m3u8",true);
                 results.Add(new {test="Real HLS stream decodes and advances in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
                 await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
+                await CheckStream(web,"d3eda505-e9d9-4c43-bb42-dae83d9566f6","江苏经典流行音乐广播","https://lhttp.qtfm.cn/live/4938/64k.mp3",false);
+                results.Add(new {test="Jiangsu music MP3 maintains native playback for five seconds",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
+                await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
+                await CheckStream(web,"24711f7f-8ff5-4141-8e0f-ab17f3da1b89","怀集音乐之声","https://nexus.local/expired-radio.mp3",false);
+                await Until(web,"nexusRadio.getState().retries===1 && !nexusRadio.getState().station.url.includes('expired-radio')",1000);
+                results.Add(new {test="Unavailable saved URL recovers via native Radio Browser UUID lookup and real audio decoding",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
+                await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
                 prefs.GetMethod("SetBool",Static).Invoke(null,new object[]{"MusicAuto",false});
                 web.CoreWebView2.Navigate("https://nexus.local/index.html?screensaver=1&audio=1&pure=1");await Task.Delay(800);
                 await Until(web,"Boolean(window.nexusRadio && window.nexus?.getState().ready)",15000);await Task.Delay(1200);
@@ -60,6 +67,8 @@ internal static class NativeAudioTests
         var json=new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(new {volume=12,muted=true,auto=true,favorites=new object[0],station=new {id=id,name=name,url=url,hls=hls}});
         await web.CoreWebView2.ExecuteScriptAsync("localStorage.setItem('nexus.radio.v1',JSON.stringify("+json+"))");
         web.CoreWebView2.Navigate("https://nexus.local/index.html?screensaver=1&audio=1&pure=1");await Task.Delay(800);
-        await Until(web,"Boolean(window.nexusRadio?.getState().playing && nexusRadio.getState().muted && nexusRadio.getState().currentTime>0.6)",30000);
+        await Until(web,"Boolean(window.nexusRadio?.getState().playing && nexusRadio.getState().muted && nexusRadio.getState().currentTime>0.6)",55000);
+        string before=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState().currentTime");await Task.Delay(5000);
+        await Until(web,"nexusRadio.getState().playing && nexusRadio.getState().currentTime > ("+before+" + 3)",5000);
     }
 }
