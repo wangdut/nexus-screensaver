@@ -6,10 +6,15 @@ WebView2: https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.2903.40
 Copies of the applicable dependency license files are included in the licenses folder.
 The Microsoft Edge WebView2 Runtime is installed and licensed separately by Microsoft.
 
-Radio directory: Radio Browser community API, https://www.radio-browser.info/
-API documentation: https://docs.radio-browser.info/
-No API key is required. Directory queries and station click reporting are made only
-when radio features are used. Audio is streamed directly from each broadcaster.
-Radio Browser and broadcasters are independent services; their availability,
-programming, advertising and geographical restrictions may change.
-No audio content is redistributed in the NEXUS package.
+Radio catalog: a locally bundled allowlist of reviewed mainland China music
+services. NEXUS 1.3.0 does not use the Radio Browser directory or click API.
+Official broadcaster pages: https://www.vojs.cn/
+Official live configuration: https://lzlive.vojs.cn/info.json
+Evidence and review scope: docs/RADIO_ALLOWLIST.md in the source repository,
+or 电台白名单说明.md in the Windows distribution.
+Audio is streamed directly from the broadcaster's official HTTPS HLS endpoints.
+Broadcaster services, programming and availability may change.
+The project has not obtained or claimed third-party commercial rebroadcast,
+redistribution or music copyright licenses. Public accessibility and CORS
+permission do not constitute such licenses. NEXUS does not record, proxy,
+store or redistribute broadcasts; no audio content is included in the package.

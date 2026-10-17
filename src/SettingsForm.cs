@@ -54,7 +54,7 @@ namespace Nexus
             ConfigureCheck(body,exitInput,"传统模式：移动鼠标或按键立即退出",Preferences.GetBool("ExitOnInput",false));
             AddHeader(body,"音乐");
             ConfigureCheck(body,music,"屏保启动时播放上次选择的电台",Preferences.GetBool("MusicAuto",false));
-            body.Controls.Add(new Label{Text="在画面右上角「♫」选择电台、收藏和调节音量。\n仅主显示器播放；退出屏保会停止音乐。",AutoSize=true,MaximumSize=new Size(480,0),ForeColor=Color.FromArgb(139,166,183),Margin=new Padding(0,7,0,14)});
+            body.Controls.Add(new Label{Text="在画面右上角「♫」选择已核验电台、收藏和调节音量。\n仅主显示器播放；退出屏保会停止音乐。",AutoSize=true,MaximumSize=new Size(480,0),ForeColor=Color.FromArgb(139,166,183),Margin=new Padding(0,7,0,14)});
             body.Controls.Add(new Label{Text=Preferences.Installed?"系统屏保由 Windows 触发，与托盘是否运行无关。\n锁屏、休眠与组织策略仍由 Windows 管理。":"当前为便携体验。运行 Install.cmd 后，可设置系统屏保、\n启用开机托盘，并在 Windows 应用列表中卸载。",AutoSize=true,MaximumSize=new Size(490,0),ForeColor=Color.FromArgb(139,166,183)});
             status.AutoSize=false;status.Dock=DockStyle.Fill;status.ForeColor=Color.FromArgb(120,229,224);layout.Controls.Add(status,0,2);
             var buttons=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=4,RowCount=1};layout.Controls.Add(buttons,0,3);

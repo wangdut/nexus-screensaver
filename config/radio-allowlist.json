@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-10-17",
+  "register": {
+    "title": "地级以上广播电视播出机构及频道频率名录（截至2026年9月30日）",
+    "url": "https://www.nrta.gov.cn/art/2026/10/14/art_69_74218.html",
+    "publishedOn": "2026-10-14",
+    "sheet": "全部地级台",
+    "row": 83
+  },
+  "stations": [
+    {
+      "id": "js-classic-975",
+      "legacyIds": ["d3eda505-e9d9-4c43-bb42-dae83d9566f6"],
+      "name": "江苏经典流行音乐广播",
+      "broadcaster": "江苏人民广播电台",
+      "licence": "1210001",
+      "registeredService": "经典流行音乐广播",
+      "frequency": "FM97.5",
+      "language": "中文",
+      "tags": "江苏 经典 流行 音乐 975",
+      "homepage": "https://www.vojs.cn/2014new/c/g/",
+      "sourcePage": "https://www.vojs.cn/2014new/live.shtml",
+      "sourceCatalog": "https://lzlive.vojs.cn/info.json",
+      "url": "https://lzlive.vojs.cn/2wtSfrS/92/live.m3u8",
+      "hls": true
+    },
+    {
+      "id": "js-music-897",
+      "legacyIds": [],
+      "name": "江苏音乐广播",
+      "broadcaster": "江苏人民广播电台",
+      "licence": "1210001",
+      "registeredService": "音乐广播",
+      "frequency": "FM89.7",
+      "language": "中文",
+      "tags": "江苏 音乐 897",
+      "homepage": "https://www.vojs.cn/2014new/c/f/",
+      "sourcePage": "https://www.vojs.cn/2014new/live.shtml",
+      "sourceCatalog": "https://lzlive.vojs.cn/info.json",
+      "url": "https://lzlive.vojs.cn/jAmO6Ng/92/live.m3u8",
+      "hls": true
+    }
+  ]
+}

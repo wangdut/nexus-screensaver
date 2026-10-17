@@ -22,8 +22,10 @@ jobs:
       - name: Build Windows application
         shell: powershell
         run: npm run build
-      - name: Verify radio recovery and playback isolation
-        run: node tests/radio-recovery.cjs
+      - name: Verify radio allowlist, recovery and playback isolation
+        run: |
+          node tests/radio-policy.cjs
+          node tests/radio-recovery.cjs
       - name: Verify isolated settings persistence
         shell: powershell
         run: ./tests/settings.ps1

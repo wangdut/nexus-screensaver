@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/wangdut/nexus-screensaver?color=5bc9c5)](https://github.com/wangdut/nexus-screensaver/releases/latest)
 [![Windows build](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml/badge.svg)](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml)
 
-[**下载 v1.2.1 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.2.1/NEXUS-Windows-x64-v1.2.1.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
+[**下载 v1.3.0 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.3.0/NEXUS-Windows-x64-v1.3.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
 
 ![NEXUS 量子星核：交互式粒子宇宙与屏保内播放器](docs/images/hero.jpg)
 
@@ -39,12 +39,12 @@
 - **随手可用的托盘**：通知区域图标，右键调整偏好、打开交互体验、立即屏保或退出。
 - **安装与卸载完整**：当前用户安装，无需管理员权限；支持控制面板卸载、开始菜单入口和保留偏好升级。
 - **按你的习惯启动**：闲置时间 1–240 分钟可调；登录自启动托盘、纯净模式和传统输入即退出均可选。
-- **给星空一点声音**：中文音乐电台优先，搜索、收藏、音量、静音和纯净模式迷你播放器。
+- **给星空一点声音**：国内持牌音乐频率白名单，支持本地搜索、收藏、音量、静音和纯净模式迷你播放器。
 - **适配不同屏幕**：宽屏、超宽屏、竖屏与窄窗口响应式布局；自动画质、节能模式及减少动态效果支持。
 
 ## 三步开始
 
-1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.2.1.zip**，完整解压。请不要下载 Source code 作为安装包。
+1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.3.zip**，完整解压。请不要下载 Source code 作为安装包。
 2. 双击 **Install.cmd**。安装完成后打开偏好设置，默认闲置 **5 分钟**启动屏保。
 3. 调整闲置时间、启动方式等选项并保存。想听音乐，进入体验画面，点击右上角 **♫** 选择电台。
 
@@ -66,21 +66,27 @@
 
 截图为便携体验状态，安装后即可启用系统屏保与登录自启动选项。
 
-## 星际电台
+## 星际电台 · 国内音乐频率白名单
 
-**1.2.1 播放修复**：连接失败时按电台 UUID 刷新音源，并最多重试两次；停止或切台会取消旧任务，避免旧错误中断新播放。收藏、音量和静音状态保留。若该台持续不可用，请换台；不会擅自切换到其他节目。
+**1.3.0 起仅收录经过核验的中国大陆持牌音乐频率，不再使用 Radio Browser 开放目录。** 搜索在本地白名单内进行，不接受自定义地址；收藏、自动播放和连接恢复都遵守同一名单。
 
-通过 [Radio Browser](https://www.radio-browser.info/) 公共 API 获取电台，无需申请密钥。默认优先展示中文音乐，可搜索电台名称、收藏常听频道，并记住音量与静音状态。
+| 电台 | 频率 | 名录中的播出机构 |
+|---|---|---|
+| 江苏经典流行音乐广播 | FM97.5 | 江苏人民广播电台 |
+| 江苏音乐广播 | FM89.7 | 江苏人民广播电台 |
 
-![星际电台：搜索、收藏、播放控制与音量调节](docs/images/radio.jpg)
+核验日期：**2026-10-17**。依据[国家广播电视总局最新公开名录](https://www.nrta.gov.cn/art/2026/10/14/art_69_74218.html)及江苏广播网的频道页、直播配置，核对播出机构许可证 1210001、节目设置及官方音源。完整来源、映射和维护规则见[电台白名单说明](docs/RADIO_ALLOWLIST.md)。
 
-- 音乐默认关闭。选择电台后，可自选「屏保启动时播放上次电台」。
-- 纯净模式保留迷你播放器；按 **M** 静音或取消静音。
-- 仅主显示器播放，跨窗口避免叠音，退出屏保停止声音，系统小预览不播放。
-- 支持设备可解码的 MP3/AAC 与 HLS；仅列出 HTTPS 音源。
-- 断网时可查看带日期的目录缓存；收听仍需联网。电台可能有主持、广告、地区或跨域限制，不保证所有音源始终可用。
+![星际电台：已核验的两个音乐频率、收藏及音量控制](docs/images/radio.jpg)
 
-视觉场景离线运行；电台目录、点击统计与广播流按需联网，不附带或下载音乐文件。
+- 音乐默认关闭。可搜索名称、频率或关键词，收藏频道；选择后可自选「屏保启动时播放上次电台」。
+- 纯净模式保留迷你播放器；音量可调，按 **M** 静音或取消静音。
+- 仅主显示器播放，跨窗口避免叠音；退出屏保停止声音，系统小预览不播放。
+- 直接连接官方 HTTPS HLS 音源，逐次限制清单与分片的来源、路径，拒绝重定向；失败最多重试两次，不自动换节目或接入未知音源。
+- 搜索无需联网，收听需要网络。广播可能包含主持、广告或临时中断。
+- 升级时已识别的旧江苏经典流行音乐广播收藏会迁移到官方源；其他白名单外的收藏和上次选择会移除，并给出提示。音量、静音及系统/视觉偏好保留，旧开放目录缓存删除。
+
+核验覆盖**频道资质及官方来源**，不代表监管部门认证 NEXUS，也不等于取得第三方商业转播或音乐版权授权。NEXUS 不录制、转存、代理或重新分发广播；未收录不表示该电台非法。视觉场景与电台搜索离线可用；播放时连接官方直播服务，更新检查按需连接 GitHub，不再发送目录查询或电台点击统计。
 
 ## 操作速查
 
@@ -143,6 +149,7 @@ npm run dev
 | 路径 | 内容 |
 | :--- | :--- |
 | web/ | 粒子场景、响应式界面、电台播放器 |
+| config/radio-allowlist.json | 经人工核验的频道与官方音源，网页和原生程序共用 |
 | src/ | Windows 宿主、托盘、系统设置及电台桥接 |
 | scripts/ | 构建、安装、卸载与白名单打包 |
 | tests/ | 网页交互、Windows 集成及发布包验证 |
@@ -152,6 +159,7 @@ npm run dev
 # 开发服务器运行时，在另一终端检查网页
 npm test
 node tests/radio.cjs
+node tests/radio-policy.cjs
 node tests/radio-recovery.cjs
 
 # Windows 系统集成检查
@@ -168,10 +176,10 @@ powershell -ExecutionPolicy Bypass -File tests/updater.ps1
 powershell -ExecutionPolicy Bypass -File tests/desktop-upgrade.ps1
 ```
 
-**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。GitHub Actions 检查 Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
+**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。v1.3 增加白名单身份与地址限制、旧收藏迁移、离线搜索和两路官方 HLS 原生播放检查。GitHub Actions 检查白名单与播放恢复、Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
 
 ## 反馈与致谢
 
 欢迎提交 [Issue](https://github.com/wangdut/nexus-screensaver/issues) 或 [Pull Request](https://github.com/wangdut/nexus-screensaver/pulls)，参与方式见 [贡献指南](CONTRIBUTING.md)。
 
-感谢 [Three.js](https://threejs.org/)、[hls.js](https://github.com/video-dev/hls.js)、[Microsoft WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) 与 [Radio Browser](https://www.radio-browser.info/)。第三方许可证见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) 和发布包 licenses 目录。
+感谢 [Three.js](https://threejs.org/)、[hls.js](https://github.com/video-dev/hls.js)、[Microsoft WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)。第三方许可证见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) 和发布包 licenses 目录。

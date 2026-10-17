@@ -6,7 +6,7 @@ $archive=(Resolve-Path -LiteralPath ('NEXUS-Windows-x64-v'+($version -replace '\
 $zip=[IO.Compression.ZipFile]::OpenRead($archive)
 try{
  $names=@($zip.Entries|ForEach-Object{$_.FullName.Replace('\','/')})
- foreach($name in @('Nexus.exe','Nexus.scr','Install.cmd','Install.ps1','Uninstall.ps1','README.md','使用说明.md','RELEASE-NOTES.md','web/app.js','web/radio.css','licenses/hls.js-LICENSE.txt')){if($name -notin $names){throw ('Missing archive entry: '+$name)}}
+ foreach($name in @('Nexus.exe','Nexus.scr','Install.cmd','Install.ps1','Uninstall.ps1','README.md','使用说明.md','电台白名单说明.md','RELEASE-NOTES.md','web/app.js','web/radio.css','licenses/hls.js-LICENSE.txt')){if($name -notin $names){throw ('Missing archive entry: '+$name)}}
  if($names|Where-Object{$_ -match 'test-profile|smoke|Tests.exe|results.json|node_modules|screenshots'}){throw 'Release includes test artifacts'}
 }finally{$zip.Dispose()}
 $folder=Join-Path (Get-Location).Path ('tests\release-'+[Guid]::NewGuid().ToString('N'))

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -170,6 +170,12 @@ namespace Nexus
                 CoreWebView2Environment environment = await CoreWebView2Environment.CreateAsync(null, Program.UpdateHealth?Path.Combine(Directory.GetParent(Program.Root.TrimEnd('\\')).FullName,"HealthCheck"):Program.RadioSmoke?Path.Combine(Program.Root,"radio-test-profile"):Path.Combine(Program.Data, "WebView"), new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required"));
                 await web.EnsureCoreWebView2Async(environment);
                 web.CoreWebView2.SetVirtualHostNameToFolderMapping("nexus.local", site, CoreWebView2HostResourceAccessKind.DenyCors);
+                web.CoreWebView2.AddWebResourceRequestedFilter("*",CoreWebView2WebResourceContext.All);
+                web.CoreWebView2.WebResourceRequested += delegate(object sender,CoreWebView2WebResourceRequestedEventArgs e) {
+                    Uri uri;bool local=Uri.TryCreate(e.Request.Uri,UriKind.Absolute,out uri)&&uri.Scheme=="https"&&uri.Host=="nexus.local"&&uri.IsDefaultPort&&uri.UserInfo.Length==0;
+                    if(!local&&!RadioService.AllowsResource(e.Request.Uri))
+                        e.Response=web.CoreWebView2.Environment.CreateWebResourceResponse(null,403,"Not in radio allowlist","");
+                };
                 web.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
                 web.CoreWebView2.Settings.AreDevToolsEnabled = false;
                 web.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
@@ -251,7 +257,6 @@ namespace Nexus
                 if(action=="preferences") result=Preferences.Snapshot();
                 else if(action=="radioSearch") result=await RadioService.Search(request.ContainsKey("query")?Convert.ToString(request["query"]):"");
                 else if(action=="radioResolve") result=await RadioService.Resolve(Convert.ToString(request["station"]));
-                else if(action=="radioClick") {await RadioService.Click(Convert.ToString(request["station"]));result=true;}
                 else if(action=="audioAcquire") { result=AcquireAudio(); }
                 else if(action=="audioRelease") { ReleaseAudio();result=true; }
                 else if(action=="musicAuto") {Preferences.SetBool("MusicAuto",Convert.ToBoolean(request["value"]));result=true;}

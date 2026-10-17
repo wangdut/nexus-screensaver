@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -39,23 +39,32 @@ internal static class NativeAudioTests
                 holder.StandardInput.WriteLine();if(!holder.WaitForExit(3000))throw new Exception("Lock helper stuck");holder.Dispose();holder=null;
                 if(!(bool)type.GetMethod("AcquireAudio",Instance).Invoke(form,null))throw new Exception("Audio was not released");type.GetMethod("ReleaseAudio",Instance).Invoke(form,null);
                 results.Add(new {test="Cross-process audio ownership blocks overlap and releases cleanly",pass=true});
-                await CheckStream(web,"24711f7f-8ff5-4141-8e0f-ab17f3da1b89","怀集音乐之声","https://lhttp.qingting.fm/live/4804/64k.mp3",false);
-                results.Add(new {test="Saved MP3 station autoplays muted from native screensaver preferences",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
+                var radio=assembly.GetType("Nexus.RadioService");
+                var all=(object[])await (Task<object>)radio.GetMethod("Search",Static).Invoke(null,new object[]{""});
+                if(all.Length!=2)throw new Exception("Native allowlist count mismatch");
+                bool rejected=false;try{radio.GetMethod("Resolve",Static).Invoke(null,new object[]{"unknown"});}catch(TargetInvocationException){rejected=true;}
+                if(!rejected)throw new Exception("Native bridge resolved unreviewed station");
+                foreach(var blocked in new[]{"https://evil.test/live.mp3","https://lzlive.vojs.cn/other/92/live.m3u8","http://lzlive.vojs.cn/2wtSfrS/92/live.m3u8","https://lzlive.vojs.cn/2wtSfrS/92/live.m3u8?redirect=1"})
+                    if((bool)radio.GetMethod("AllowsResource",Static).Invoke(null,new object[]{blocked}))throw new Exception("Native resource guard accepted "+blocked);
+                results.Add(new {test="Native search/resolve and resource guard restrict stations and sources",pass=true});
+                await CheckStream(web,"js-classic-975","江苏经典流行音乐广播","https://lzlive.vojs.cn/2wtSfrS/92/live.m3u8",true);
+                results.Add(new {test="Official FM97.5 HLS advances for five seconds in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
                 await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
-                await CheckStream(web,"ecbe92bf-a35b-439f-8bcf-55da0ece14ee","BRTV北京音乐广播","https://brtv-radiolive.rbc.cn/alive/fm974.m3u8",true);
-                results.Add(new {test="Real HLS stream decodes and advances in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
+                await CheckStream(web,"js-music-897","江苏音乐广播","https://lzlive.vojs.cn/jAmO6Ng/92/live.m3u8",true);
+                results.Add(new {test="Official FM89.7 HLS advances for five seconds in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
                 await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
-                await CheckStream(web,"d3eda505-e9d9-4c43-bb42-dae83d9566f6","江苏经典流行音乐广播","https://lhttp.qtfm.cn/live/4938/64k.mp3",false);
-                results.Add(new {test="Jiangsu music MP3 maintains native playback for five seconds",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
-                await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
-                await CheckStream(web,"24711f7f-8ff5-4141-8e0f-ab17f3da1b89","怀集音乐之声","https://nexus.local/expired-radio.mp3",false);
-                await Until(web,"nexusRadio.getState().retries===1 && !nexusRadio.getState().station.url.includes('expired-radio')",1000);
-                results.Add(new {test="Unavailable saved URL recovers via native Radio Browser UUID lookup and real audio decoding",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
-                await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
+                await CheckStream(web,"d3eda505-e9d9-4c43-bb42-dae83d9566f6","forged","https://evil.test/live.mp3",false);
+                await Until(web,"nexusRadio.getState().station.id==='js-classic-975' && nexusRadio.getState().station.url.startsWith('https://lzlive.vojs.cn/')",1000);
+                results.Add(new {test="Old favorite migrates to canonical official stream, ignoring arbitrary saved URL",pass=true});
+                await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop();localStorage.setItem('nexus.radio.v1',JSON.stringify({volume:12,muted:true,station:{id:'unreviewed',name:'江苏音乐广播',url:'https://lzlive.vojs.cn/jAmO6Ng/92/live.m3u8'}}))");
+                web.CoreWebView2.Navigate("https://nexus.local/index.html?screensaver=1&audio=1&pure=1");await Task.Delay(1500);
+                await Until(web,"Boolean(window.nexusRadio) && nexusRadio.getState().station===null && !nexusRadio.getState().playing && !nexusRadio.getState().busy",5000);
+                results.Add(new {test="Unreviewed saved station cannot autoplay even with an approved name and URL",pass=true});
                 prefs.GetMethod("SetBool",Static).Invoke(null,new object[]{"MusicAuto",false});
+                await web.CoreWebView2.ExecuteScriptAsync("localStorage.setItem('nexus.radio.v1',JSON.stringify({volume:12,muted:true,auto:true,station:{id:'js-classic-975'}}))");
                 web.CoreWebView2.Navigate("https://nexus.local/index.html?screensaver=1&audio=1&pure=1");await Task.Delay(800);
                 await Until(web,"Boolean(window.nexusRadio && window.nexus?.getState().ready)",15000);await Task.Delay(1200);
-                await Until(web,"!nexusRadio.getState().auto&&!nexusRadio.getState().playing&&!nexusRadio.getState().busy",3000);
+                await Until(web,"nexusRadio.getState().station.id==='js-classic-975'&&!nexusRadio.getState().auto&&!nexusRadio.getState().playing&&!nexusRadio.getState().busy",3000);
                 results.Add(new {test="Disabling autoplay leaves screensaver silent",pass=true});
             }catch(Exception e){results.Add(new {test="Native audio integration",pass=false,error=e.ToString()});Environment.ExitCode=1;}
             finally{if(holder!=null){if(!holder.HasExited)holder.Kill();holder.Dispose();}try{Registry.CurrentUser.DeleteSubKeyTree(key);}catch{}var json=new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(results);File.WriteAllText(Path.Combine(root,"native-audio-results.json"),json);Console.WriteLine(json);form.Close();}
@@ -69,6 +78,6 @@ internal static class NativeAudioTests
         web.CoreWebView2.Navigate("https://nexus.local/index.html?screensaver=1&audio=1&pure=1");await Task.Delay(800);
         await Until(web,"Boolean(window.nexusRadio?.getState().playing && nexusRadio.getState().muted && nexusRadio.getState().currentTime>0.6)",55000);
         string before=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState().currentTime");await Task.Delay(5000);
-        await Until(web,"nexusRadio.getState().playing && nexusRadio.getState().currentTime > ("+before+" + 3)",5000);
+        await Until(web,"nexusRadio.getState().playing && nexusRadio.getState().muted && nexusRadio.getState().currentTime > ("+before+" + 3)",5000);
     }
 }

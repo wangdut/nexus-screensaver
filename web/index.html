@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#060b11">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https:; media-src https: blob:; object-src 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' __RADIO_SOURCES__; media-src blob:; object-src 'none'; base-uri 'none'">
   <title>NEXUS · 星核实验室</title>
   <link rel="icon" type="image/x-icon" href="nexus.ico">
   <link rel="stylesheet" href="style.css">
@@ -90,16 +90,16 @@
     <dialog id="radioDialog" aria-labelledby="radioHeading">
       <button id="closeRadio" class="dialog-close" aria-label="关闭音乐电台">×</button>
       <span class="eyebrow">NEXUS / INTERSTELLAR RADIO</span><h2 id="radioHeading">给星空，一点声音。</h2>
-      <p>中文音乐优先 · Radio Browser 电台目录</p>
-      <form id="radioSearchForm" class="radio-search"><input id="radioQuery" maxlength="64" placeholder="搜索名称，如：音乐、CNR、古典" aria-label="搜索电台名称"><button type="submit" id="radioSearchButton">搜索</button><button type="button" id="favoritesButton" aria-pressed="false">收藏</button></form>
-      <p id="directoryStatus" role="status">打开后获取电台目录，播放需要联网。</p>
+      <p>国内持牌音乐频率 · 已核验白名单</p>
+      <form id="radioSearchForm" class="radio-search"><input id="radioQuery" maxlength="64" placeholder="搜索白名单：江苏、97.5、89.7" aria-label="搜索电台名称"><button type="submit" id="radioSearchButton">搜索</button><button type="button" id="favoritesButton" aria-pressed="false">收藏</button></form>
+      <p id="directoryStatus" role="status">目录离线可用，收听官方直播需要联网。</p>
       <div id="stationList" class="station-list" aria-label="电台列表"></div>
       <section class="radio-player" aria-label="播放器">
         <strong id="nowStation">选择一个电台，给星空一点声音</strong><p id="radioStatus" role="status" aria-live="polite">尚未播放</p>
         <div class="radio-playback"><button id="radioPlay">播放电台</button><button id="radioMute" aria-pressed="false">静音</button><label for="radioVolume">音量 <output id="radioVolumeValue">35%</output></label><input id="radioVolume" type="range" min="0" max="100" value="35"></div>
         <label class="music-auto"><input id="musicAuto" type="checkbox">屏保启动时播放上次电台</label>
       </section>
-      <p class="radio-note">电台内容由广播方提供，可能含主持或广告；不可用时可换台重试。纯净模式下仍可调节音量，M 快速静音。</p>
+      <p class="radio-note">收录范围：江苏经典流行音乐广播 FM97.5、江苏音乐广播 FM89.7。核验于 2026-10-17；频道来源与依据见随包《电台白名单说明》。未收录的频道不会出现在搜索或自动播放中。</p>
     </dialog>
     <section id="fallback" hidden role="alert"><h2>星核暂时无法点亮</h2><p>需要支持 WebGL 2 的显卡与驱动。请开启浏览器硬件加速，或更新显卡驱动后再试。</p></section>
   </main>
