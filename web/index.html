@@ -24,6 +24,7 @@
       </a>
       <div class="header-center"><span class="live-dot"></span> INTERACTIVE AMBIENCE <span class="header-divider">/</span> <span id="fps">—</span> FPS</div>
       <nav class="header-actions" aria-label="视图工具">
+        <button class="icon-button" id="rhythmButton" aria-label="音乐律动设置" aria-pressed="true" title="音乐律动">≋</button>
         <button class="icon-button" id="radioButton" aria-label="打开音乐电台" title="音乐电台">♫</button>
         <button class="icon-button" id="settingsButton" aria-label="打开应用设置" title="应用设置">⚙</button>
         <button class="icon-button" id="helpButton" aria-label="操作指南" title="操作指南 [?]">?</button>
@@ -100,6 +101,23 @@
         <label class="music-auto"><input id="musicAuto" type="checkbox">屏保启动时播放上次电台</label>
       </section>
       <p class="radio-note">收录范围：江苏经典流行音乐广播 FM97.5、江苏音乐广播 FM89.7。核验于 2026-10-17；频道来源与依据见随包《电台白名单说明》。未收录的频道不会出现在搜索或自动播放中。</p>
+    </dialog>
+    <dialog id="rhythmDialog" aria-labelledby="rhythmHeading">
+      <button id="closeRhythm" class="dialog-close" aria-label="关闭律动设置">×</button>
+      <span class="eyebrow">NEXUS / SONIC RESONANCE</span>
+      <h2 id="rhythmHeading">让声音，有形。</h2>
+      <p>低音舒展星核，旋律编织光带。<br>每一次共振，都来自正在播放的声音。</p>
+      <div class="rhythm-monitor" aria-label="实时音频频谱">
+        <div class="rhythm-monitor-title"><span id="rhythmBadge">电台共振</span><span>40 Hz — 16 kHz</span></div>
+        <div id="rhythmMeter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <small id="rhythmReadout">低频 0 / 中频 0 / 高频 0</small>
+      </div>
+      <label class="rhythm-source-label" for="rhythmSource">跟随的声音<select id="rhythmSource"><option value="radio">内置电台</option><option value="system">电脑声音 · 默认播放设备</option><option value="off">关闭律动</option></select></label>
+      <label class="range-label" for="rhythmIntensity"><span>律动强度</span><output id="rhythmValue">80%</output></label>
+      <input id="rhythmIntensity" type="range" min="0" max="150" value="80">
+      <p id="rhythmStatus" role="status" aria-live="polite">播放电台，点亮共振</p>
+      <button id="rhythmEnable" class="primary-button" hidden>启用分析 ↗</button>
+      <p class="rhythm-note">「电脑声音」可跟随音乐软件、浏览器等在默认设备上播放的声音。只在本机实时分析，不录音、不上传、不使用麦克风。暂停画面或最小化后停止分析；无声时自然回落。</p>
     </dialog>
     <section id="fallback" hidden role="alert"><h2>星核暂时无法点亮</h2><p>需要支持 WebGL 2 的显卡与驱动。请开启浏览器硬件加速，或更新显卡驱动后再试。</p></section>
   </main>

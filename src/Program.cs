@@ -99,6 +99,10 @@ namespace Nexus
         private FormWindowState windowState;
         private readonly System.Windows.Forms.Timer parentTimer = new System.Windows.Forms.Timer();
         private readonly System.Windows.Forms.Timer smokeTimer = new System.Windows.Forms.Timer();
+        private readonly System.Windows.Forms.Timer rhythmTimer = new System.Windows.Forms.Timer();
+        private AudioLoopback loopback;
+        private bool rhythmRequested;
+        private long rhythmSequence=-1;
         private readonly Label loading = new Label();
         [DllImport("user32.dll", SetLastError = true)] private static extern IntPtr SetParent(IntPtr child, IntPtr parent);
         [DllImport("user32.dll")] private static extern IntPtr GetParent(IntPtr child);
@@ -135,8 +139,19 @@ namespace Nexus
             web.Dock = DockStyle.Fill; web.DefaultBackgroundColor = BackColor;
             web.Visible = false; Controls.Add(web);
             Shown += async delegate { if (parent != IntPtr.Zero) AttachPreview(); await InitializeWeb(); };
+            rhythmTimer.Interval=40;
+            rhythmTimer.Tick+=delegate {
+                if(loopback==null||WindowState==FormWindowState.Minimized)return;
+                var frame=loopback.Latest;if(frame.sequence==rhythmSequence)return;
+                rhythmSequence=frame.sequence;PostRhythm(frame);
+            };
+            Resize+=delegate {
+                if(WindowState==FormWindowState.Minimized){bool requested=rhythmRequested;StopRhythm();rhythmRequested=requested;}
+                else if(rhythmRequested&&loopback==null){loopback=AudioLoopback.Acquire();rhythmSequence=-1;rhythmTimer.Start();}
+            };
             FormClosed += delegate
             {
+                StopRhythm();rhythmTimer.Dispose();
                 ReleaseAudio(); parentTimer.Stop(); parentTimer.Dispose(); smokeTimer.Stop(); smokeTimer.Dispose(); web.Dispose();
                 if (saver) Program.ExitAll();
             };
@@ -185,6 +200,7 @@ namespace Nexus
                 web.CoreWebView2.PermissionRequested += delegate(object sender, CoreWebView2PermissionRequestedEventArgs e) { e.State = CoreWebView2PermissionState.Deny; };
                 web.CoreWebView2.NewWindowRequested += delegate(object sender, CoreWebView2NewWindowRequestedEventArgs e) { e.Handled = true; };
                 web.CoreWebView2.NavigationStarting += delegate(object sender, CoreWebView2NavigationStartingEventArgs e) { if (!e.Uri.StartsWith("https://nexus.local/", StringComparison.OrdinalIgnoreCase)) e.Cancel = true; };
+                web.CoreWebView2.NavigationStarting += delegate { StopRhythm(); };
                 web.CoreWebView2.WebMessageReceived += async delegate(object sender, CoreWebView2WebMessageReceivedEventArgs e)
                 {
                     if (!e.Source.StartsWith("https://nexus.local/", StringComparison.OrdinalIgnoreCase)) return;
@@ -254,6 +270,19 @@ namespace Nexus
             try {
                 var request=Preferences.Json.Deserialize<Dictionary<string,object>>(message);
                 id=Convert.ToString(request["id"]);string action=Convert.ToString(request["action"]);object result=null;
+                if(action=="rhythmSystem") {
+                    if(Convert.ToBoolean(request["enabled"])&&parent==IntPtr.Zero&&!Program.UpdateHealth){rhythmRequested=true;if(WindowState!=FormWindowState.Minimized){if(loopback==null)loopback=AudioLoopback.Acquire();rhythmSequence=-1;rhythmTimer.Start();}}
+                    else StopRhythm();return;
+                }
+                if(action=="rhythmRelay") {
+                    if(saver&&audioOwner&&parent==IntPtr.Zero) {
+                        var bands=Preferences.Json.ConvertToType<double[]>(request["bands"]);double rms=Convert.ToDouble(request["rms"]);
+                        if(bands.Length!=32||Double.IsNaN(rms)||Double.IsInfinity(rms)||rms<0||rms>1)return;
+                        for(int i=0;i<bands.Length;i++)if(Double.IsNaN(bands[i])||Double.IsInfinity(bands[i])||bands[i]<0||bands[i]>1)return;
+                        var frame=new {type="rhythm",source="radio",bands=bands,rms=rms,status=Convert.ToString(request["status"])};
+                        foreach(var window in Program.Windows)if(window!=this&&!window.audioOwner)window.PostRhythm(frame);
+                    }return;
+                }
                 if(action=="preferences") result=Preferences.Snapshot();
                 else if(action=="radioSearch") result=await RadioService.Search(request.ContainsKey("query")?Convert.ToString(request["query"]):"");
                 else if(action=="radioResolve") result=await RadioService.Resolve(Convert.ToString(request["station"]));
@@ -265,6 +294,8 @@ namespace Nexus
             } catch(Exception error) { if(!IsDisposed&&web.CoreWebView2!=null)web.CoreWebView2.PostWebMessageAsJson(Preferences.Json.Serialize(new {id=id,error=error.Message})); }
         }
         private bool AcquireAudio() { if(!audioOwner)return false;if(ownsAudio)return true;audioMutex=new Mutex(false,TrayContext.Scope+"-audio");try{ownsAudio=audioMutex.WaitOne(0);}catch(AbandonedMutexException){ownsAudio=true;}if(!ownsAudio){audioMutex.Dispose();audioMutex=null;}return ownsAudio; }
+        private void PostRhythm(object frame) { if(!IsDisposed&&web.CoreWebView2!=null)try{web.CoreWebView2.PostWebMessageAsJson(Preferences.Json.Serialize(frame));}catch(InvalidOperationException){} }
+        private void StopRhythm() { rhythmRequested=false;rhythmTimer.Stop();if(loopback!=null){loopback.Dispose();loopback=null;}rhythmSequence=-1; }
         private void ReleaseAudio() { if(ownsAudio&&audioMutex!=null){audioMutex.ReleaseMutex();ownsAudio=false;}if(audioMutex!=null){audioMutex.Dispose();audioMutex=null;} }
         private void ToggleFullscreen()
         {

@@ -53,6 +53,7 @@ namespace Nexus
             ConfigureCheck(body,pure,"屏保以纯净模式启动 · H 显示控件",Preferences.GetBool("PureMode",true));
             ConfigureCheck(body,exitInput,"传统模式：移动鼠标或按键立即退出",Preferences.GetBool("ExitOnInput",false));
             AddHeader(body,"音乐");
+            body.Controls.Add(new Label{Text="音乐律动：在体验画面右上角「≋」选择内置电台或电脑声音，\n并调节律动强度。偏好自动保存，多屏共享音频分析。",AutoSize=true,MaximumSize=new Size(480,0),ForeColor=Color.FromArgb(139,166,183),Margin=new Padding(0,7,0,14)});
             ConfigureCheck(body,music,"屏保启动时播放上次选择的电台",Preferences.GetBool("MusicAuto",false));
             body.Controls.Add(new Label{Text="在画面右上角「♫」选择已核验电台、收藏和调节音量。\n仅主显示器播放；退出屏保会停止音乐。",AutoSize=true,MaximumSize=new Size(480,0),ForeColor=Color.FromArgb(139,166,183),Margin=new Padding(0,7,0,14)});
             body.Controls.Add(new Label{Text=Preferences.Installed?"系统屏保由 Windows 触发，与托盘是否运行无关。\n锁屏、休眠与组织策略仍由 Windows 管理。":"当前为便携体验。运行 Install.cmd 后，可设置系统屏保、\n启用开机托盘，并在 Windows 应用列表中卸载。",AutoSize=true,MaximumSize=new Size(490,0),ForeColor=Color.FromArgb(139,166,183)});

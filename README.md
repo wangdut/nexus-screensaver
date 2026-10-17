@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-5bc9c5)](LICENSE)
 [![Windows build](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml/badge.svg)](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml)
 
-[**下载 v1.3.0 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.3.0/NEXUS-Windows-x64-v1.3.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
+[**下载 v1.4.0 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.4.0/NEXUS-Windows-x64-v1.4.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
 
 ![NEXUS 量子星核：交互式粒子宇宙与屏保内播放器](docs/images/hero.jpg)
 
@@ -31,6 +31,36 @@
 | :---: | :---: |
 | ![引力星环实机画面](docs/images/orbit.jpg) | ![时空之门实机画面](docs/images/warp.jpg) |
 
+## 1.4 新增 · 让声音，有形。
+
+音乐可以来自内置白名单电台，也可以来自你正在使用的音乐软件。点击右上角 **≋**，选择「内置电台」或「电脑声音」，三种粒子形态就会根据真实频谱、响度与节拍瞬态产生不同的共振。
+
+![真实音频驱动的量子星核与频谱光带](docs/images/rhythm-core.jpg)
+
+<details>
+<summary>查看三种场景的音乐律动动图（无声）</summary>
+
+![确定性测试音频驱动的三种场景共振](docs/images/rhythm-demo.gif)
+
+</details>
+
+| 量子星核 | 引力星环 | 时空之门 |
+|---|---|---|
+| 低音让星核舒展，频谱光带环绕 | 节拍推动传播波，旋律塑造轨道 | 声音改变环带的半径和纵深 |
+
+| 星环共振 | 时空之门共振 |
+| :---: | :---: |
+| ![音乐驱动的引力星环](docs/images/rhythm-orbit.jpg) | ![音乐驱动的时空之门](docs/images/rhythm-gate.jpg) |
+
+<p align="center"><img src="docs/images/rhythm-controls.jpg" alt="音乐律动：实时频谱、音源与强度控制" width="520"></p>
+
+- **跟随真实声音**：32 个频带区分低、中、高频，持续单音不会凭空出现反复鼓点，无声时附加光效自然消退。
+- **可调、可关闭**：强度 0–150%，偏好自动保存；关闭律动仍可听音乐。纯净模式按 H 显示控制，再点击 ≋ 调整。
+- **电脑声音留在本机**：读取默认播放设备的输出，不使用麦克风，不录音、不上传。暂停、最小化和退出释放分析资源。
+- **保留电台体验**：独立读取播放信号，音量、静音、切台、重连和白名单继续有效；多屏共享频谱，不重复播放。
+
+效果图使用确定性测试音频驱动；实际形态随音乐变化。电脑声音需要 Windows 版，播放器应使用 Windows 默认输出设备。实现、验证及设备兼容说明见 [音乐律动说明](docs/AUDIO_REACTIVITY.md)。
+
 ## 不止好看，也能日常使用
 
 - **统一深色窗口**：体验窗口和设置窗口的标题栏融入主题，保留拖动、缩放、最小化和系统贴边操作；全屏仍为无边框。
@@ -45,7 +75,7 @@
 
 ## 三步开始
 
-1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.3.zip**，完整解压。请不要下载 Source code 作为安装包。
+1. 从 [Releases](https://github.com/wangdut/nexus-screensaver/releases/latest) 下载 **NEXUS-Windows-x64-v1.4.zip**，完整解压。请不要下载 Source code 作为安装包。
 2. 双击 **Install.cmd**。安装完成后打开偏好设置，默认闲置 **5 分钟**启动屏保。
 3. 调整闲置时间、启动方式等选项并保存。想听音乐，进入体验画面，点击右上角 **♫** 选择电台。
 
@@ -101,6 +131,7 @@
 | H | 纯净模式 / 显示控件 |
 | F | 体验窗口切换全屏 |
 | M | 静音 / 取消静音 |
+| 右上角 ≋ | 音源、律动强度与实时频谱 |
 | ? | 操作指南 |
 | Esc | 关闭弹窗、退出全屏或退出屏保 |
 
@@ -133,7 +164,7 @@
 
 ## 开发与构建
 
-技术栈：**Three.js + WebGL 2 + hls.js + C# WinForms + WebView2**。
+技术栈：**Three.js + WebGL 2 + Web Audio + WASAPI + hls.js + C# WinForms + WebView2**。
 
 在 Windows 项目目录中执行：
 
@@ -162,6 +193,8 @@ npm test
 node tests/radio.cjs
 node tests/radio-policy.cjs
 node tests/radio-recovery.cjs
+node tests/rhythm-signal.mjs
+node tests/rhythm.cjs
 
 # Windows 系统集成检查
 powershell -ExecutionPolicy Bypass -File tests/settings.ps1
@@ -169,6 +202,8 @@ powershell -ExecutionPolicy Bypass -File tests/installer.ps1
 powershell -ExecutionPolicy Bypass -File tests/native.ps1
 powershell -ExecutionPolicy Bypass -File tests/tray.ps1
 powershell -ExecutionPolicy Bypass -File tests/native-audio.ps1
+powershell -ExecutionPolicy Bypass -File tests/spectrum.ps1 -Live
+powershell -ExecutionPolicy Bypass -File tests/native-rhythm.ps1
 
 # 生成并检查完整发布包
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1
@@ -177,7 +212,7 @@ powershell -ExecutionPolicy Bypass -File tests/updater.ps1
 powershell -ExecutionPolicy Bypass -File tests/desktop-upgrade.ps1
 ```
 
-**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。v1.3 增加白名单身份与地址限制、旧收藏迁移、离线搜索和两路官方 HLS 原生播放检查。GitHub Actions 检查白名单与播放恢复、Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
+**v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。v1.3 增加白名单身份与地址限制、旧收藏迁移、离线搜索和两路官方 HLS 原生播放检查。v1.4 增加真实频谱、WASAPI 回环、静音与生命周期、多窗口共享及音频响应布局检查。GitHub Actions 检查音频信号处理、白名单与播放恢复、Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
 
 ## 许可证
 

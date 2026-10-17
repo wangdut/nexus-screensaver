@@ -49,6 +49,12 @@ internal static class NativeAudioTests
                 results.Add(new {test="Native search/resolve and resource guard restrict stations and sources",pass=true});
                 await CheckStream(web,"js-classic-975","江苏经典流行音乐广播","https://lzlive.vojs.cn/2wtSfrS/92/live.m3u8",true);
                 results.Add(new {test="Official FM97.5 HLS advances for five seconds in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});
+                await web.CoreWebView2.ExecuteScriptAsync("document.getElementById('radioMute').click()");
+                await Until(web,"nexusRhythm.getState().energy>.01&&nexusRhythm.getState().rms>0",12000);
+                results.Add(new {test="Official live radio produces real measured spectrum without rerouting playback",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRhythm.getState()")});
+                await web.CoreWebView2.ExecuteScriptAsync("document.getElementById('radioMute').click()");await Task.Delay(1800);
+                await Until(web,"nexusRhythm.getState().energy<.001&&nexusRadio.getState().playing",3000);
+                results.Add(new {test="Muting live radio stops resonance while playback stays healthy",pass=true});
                 await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.stop()");
                 await CheckStream(web,"js-music-897","江苏音乐广播","https://lzlive.vojs.cn/jAmO6Ng/92/live.m3u8",true);
                 results.Add(new {test="Official FM89.7 HLS advances for five seconds in Windows WebView2",pass=true,state=await web.CoreWebView2.ExecuteScriptAsync("nexusRadio.getState()")});

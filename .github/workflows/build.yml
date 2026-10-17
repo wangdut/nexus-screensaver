@@ -29,6 +29,12 @@ jobs:
       - name: Verify isolated settings persistence
         shell: powershell
         run: ./tests/settings.ps1
+      - name: Verify audio signal processing and PCM formats
+        shell: powershell
+        run: |
+          node tests/rhythm-signal.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Rhythm signal tests failed' }
+          ./tests/spectrum.ps1
       - name: Verify isolated install, upgrade and uninstall
         shell: powershell
         run: ./tests/installer.ps1

@@ -4,6 +4,8 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import './radio.js';
+import {updateRhythm} from './rhythm.js';
+import {createResonance} from './resonance.js';
 
 const $=id=>document.getElementById(id);
 const app=$('app');
@@ -42,12 +44,12 @@ const rand=(()=>{let seed=21873;return()=>{seed=(Math.imul(seed,1664525)+1013904
 function init(){
   try{
     renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});
-  }catch(error){$('fallback').hidden=false;console.error(error);return;}
+  }catch(error){$('fallback').hidden=false;document.dispatchEvent(new Event('nexus-render-stopped'));console.error(error);return;}
   renderer.setClearColor(0x000000,0);
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.15;
   $('universe').appendChild(renderer.domElement);
-  renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();state.contextLost=true;cancelAnimationFrame(raf);toast('渲染暂停，正在等待显卡恢复');});
+  renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();state.contextLost=true;cancelAnimationFrame(raf);document.dispatchEvent(new Event('nexus-render-stopped'));toast('渲染暂停，正在等待显卡恢复');});
   renderer.domElement.addEventListener('webglcontextrestored',()=>location.reload());
   scene=new THREE.Scene();scene.background=new THREE.Color(0x060b11);
   camera=new THREE.PerspectiveCamera(42,1,.1,100);
@@ -87,12 +89,14 @@ function init(){
   geometry.setAttribute('aGate',new THREE.BufferAttribute(gate,3));
   geometry.setAttribute('aSeed',new THREE.BufferAttribute(seeds,3));
   uniforms={uTime:{value:0},uWeights:{value:new THREE.Vector3(1,0,0)},uPixelRatio:{value:1},uGravity:{value:state.gravity/100},uPointer:{value:new THREE.Vector3(99,99,0)},uCharge:{value:0},uColorA:{value:new THREE.Color(palettes[state.palette].primary)},uColorB:{value:new THREE.Color(palettes[state.palette].secondary)},uPulsePositions:{value:pulsePositions},uPulseTimes:{value:pulseTimes}};
+  uniforms.uAudio={value:new THREE.Vector4()};uniforms.uBands={value:new Float32Array(32)};uniforms.uOnset={value:0};uniforms.uBeatAge={value:100};
   const material=new THREE.ShaderMaterial({
     uniforms,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
     vertexShader:`
       attribute vec3 aCore; attribute vec3 aOrbit; attribute vec3 aGate; attribute vec3 aSeed;
       uniform float uTime; uniform vec3 uWeights; uniform float uPixelRatio;
       uniform vec3 uPointer; uniform float uCharge; uniform float uGravity;
+      uniform vec4 uAudio;uniform float uBands[32];uniform float uOnset;uniform float uBeatAge;
       uniform vec3 uPulsePositions[4]; uniform float uPulseTimes[4];
       varying float vAlpha; varying float vTint; varying float vSpark;
       mat2 turn(float a){return mat2(cos(a),-sin(a),sin(a),cos(a));}
@@ -103,14 +107,22 @@ function init(){
         float breath=sin(t*.65+core.y*2.)*.025+sin(t*.31+core.x*3.)*.018;
         core*=1.+breath;
         core.y+=.028*sin(t*.5+atan(core.z,core.x)*7.);
+        float spectrum=uBands[int(clamp(aSeed.x*31.,0.,31.))];
+        core*=1.+uAudio.x*.13+spectrum*.055;
+        core+=normalize(core)*uAudio.y*.08*sin(atan(core.z,core.x)*9.+core.y*5.);
         vec3 orbit=aOrbit;
         float radius=length(orbit.xz);
         orbit.xz=turn(t*(.08+.19/(radius+.5)))*orbit.xz;
+        float soundWave=exp(-pow((radius-uBeatAge*4.2)*3.5,2.))*exp(-uBeatAge*1.4)*uAudio.w;
+        orbit.xz*=1.+uAudio.x*.08;
+        orbit.y+=spectrum*.25*sin(radius*5.+aSeed.x*6.28)+soundWave*.32;
         orbit.yz=turn(.36)*orbit.yz;
         orbit.xy=turn(-.24)*orbit.xy;
         vec3 gate=aGate;
         gate.xy=turn(t*.12)*gate.xy;
         gate.z+=.13*sin(atan(gate.y,gate.x)*6.-t*.7);
+        gate.xy*=1.+uAudio.x*.1+spectrum*.12;
+        gate.z+=spectrum*.32*sin(atan(gate.y,gate.x)*8.-t*.7);
         gate.xz=turn(.20*sin(t*.15)+.13)*gate.xz;
         vec3 p=core*uWeights.x+orbit*uWeights.y+gate*uWeights.z;
         vec4 world=modelMatrix*vec4(p,1.);
@@ -130,10 +142,11 @@ function init(){
         vec4 mv=viewMatrix*world;
         gl_Position=projectionMatrix*mv;
         float sparkle=pow(max(0.,sin(t*(.5+aSeed.y)+aSeed.x*170.)),18.);
+        float soundLight=spectrum*.42+uAudio.z*aSeed.y*.35+soundWave*uWeights.y*.6;
         gl_PointSize=clamp((1.65+aSeed.y*1.15+sparkle*2.1+energy*1.9)*uPixelRatio*(9./-mv.z),.9,8.*uPixelRatio);
-        vAlpha=(.45+aSeed.z*.65+sparkle*.55+field*.4+energy*1.2)*smoothstep(-4.5,1.8,p.z);
+        vAlpha=(.45+aSeed.z*.65+sparkle*.55+field*.4+energy*1.2+soundLight)*smoothstep(-4.5,1.8,p.z);
         vTint=clamp(aSeed.x*.62+(.5+p.z*.18)*.38,0.,1.);
-        vSpark=sparkle+energy;
+        vSpark=sparkle+energy+soundLight;
       }`,
     fragmentShader:`
       uniform vec3 uColorA;uniform vec3 uColorB;
@@ -147,6 +160,7 @@ function init(){
       }`
   });
   particles=new THREE.Points(geometry,material);particles.frustumCulled=false;universe.add(particles);
+  universe.add(createResonance(uniforms));
   createStars();createOrbits();
   composer=new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene,camera));
@@ -188,6 +202,10 @@ function init(){
     if(now-lastRender<(preview||state.quality==='eco'?1000/30:1000/60)-.5)return;
     lastRender=now;
     const dt=Math.min((now-(lastFrame||now))/1000,.05);lastFrame=now;
+    const sound=updateRhythm(dt,now,state.paused);
+    uniforms.uAudio.value.set(sound.low,sound.mid,sound.high,sound.energy);uniforms.uBands.value=sound.bands;
+    uniforms.uOnset.value=sound.onset;uniforms.uBeatAge.value=Math.min(100,(now-sound.lastBeat)/1000);
+    bloom.strength=.5+Math.min(.16,sound.energy*.09+sound.onset*.05);
     if(!state.paused){clockTime+=dt*state.speed/10;sceneAge+=dt;}
     if(state.autoplay&&!state.paused&&!pointer.down&&sceneAge>75){setScene((state.scene+1)%3,true);sceneAge=0;}
     if(pointer.down){state.charge=Math.min(1,state.charge+dt*.48);$('chargeArc').style.strokeDashoffset=String(163.4*(1-state.charge));}
@@ -312,7 +330,7 @@ document.addEventListener('keydown',event=>{
     if(document.fullscreenElement){document.exitFullscreen();return;}
     if(state.zen)setZen(false);return;
   }
-  if(editing||$('helpDialog').open||$('radioDialog').open||event.ctrlKey||event.altKey||event.metaKey)return;
+  if(editing||$('helpDialog').open||$('radioDialog').open||$('rhythmDialog').open||event.ctrlKey||event.altKey||event.metaKey)return;
   if(['1','2','3'].includes(event.key)){setScene(Number(event.key)-1);return;}
   if(event.code==='Space'){event.preventDefault();if(!event.repeat)setPause();}
   if(event.key.toLowerCase()==='h')setZen(!state.zen);

@@ -108,6 +108,6 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('radioDia
 if(native){$('settingsButton').addEventListener('click',()=>window.chrome.webview.postMessage('settings'));host('preferences').then(p=>{prefs.auto=p.musicAuto;save();controls();if(canPlay&&params.has('screensaver')&&prefs.auto&&prefs.station)play();}).catch(()=>{});}else{$('settingsButton').addEventListener('click',()=>{setStatus('系统设置请在 Windows 体验版或托盘中打开。');open();});}
 if(!canPlay){$('radioButton').hidden=true;$('audioDock').hidden=true;}
 window.addEventListener('pagehide',()=>{generation++;unload();release();});
-window.nexusRadio={stop,getState:()=>({station:prefs.station,volume:prefs.volume,muted:prefs.muted,auto:prefs.auto,playing,busy,favorites:prefs.favorites.length,stations:stations.length,currentTime:audio.currentTime,readyState:audio.readyState,retries,lastError,reviewedOn}),open};
+window.nexusRadio={stop,getMedia:()=>audio,getState:()=>({station:prefs.station,volume:prefs.volume,muted:prefs.muted,auto:prefs.auto,playing,busy,favorites:prefs.favorites.length,stations:stations.length,currentTime:audio.currentTime,readyState:audio.readyState,retries,lastError,reviewedOn}),open};
 try{localStorage.removeItem('nexus.radio.cache');}catch{}
 save();controls();setStatus(removedSaved?'已移除白名单外的旧电台，请重新选择；音量和静音已保留。':'音乐默认关闭 · 仅播放已核验白名单电台');
