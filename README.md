@@ -9,6 +9,7 @@
 ![Windows 10 / 11](https://img.shields.io/badge/Windows-10%20%2F%2011-0078D4?logo=windows)
 ![Architecture](https://img.shields.io/badge/架构-x64-64748b)
 [![Release](https://img.shields.io/github/v/release/wangdut/nexus-screensaver?color=5bc9c5)](https://github.com/wangdut/nexus-screensaver/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-5bc9c5)](LICENSE)
 [![Windows build](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml/badge.svg)](https://github.com/wangdut/nexus-screensaver/actions/workflows/build.yml)
 
 [**下载 v1.3.0 Windows 完整包**](https://github.com/wangdut/nexus-screensaver/releases/download/v1.3.0/NEXUS-Windows-x64-v1.3.zip) · [使用指南](docs/USER_GUIDE.md) · [更新记录](CHANGELOG.md) · [反馈问题](https://github.com/wangdut/nexus-screensaver/issues)
@@ -177,6 +178,12 @@ powershell -ExecutionPolicy Bypass -File tests/desktop-upgrade.ps1
 ```
 
 **v1.1 发布前完成 47 项本地检查**，包括实际 MP3 / HLS 静音解码、托盘单实例、设置持久化、安装升级卸载及解压运行。安装与设置测试使用隔离注册表分支。v1.2 新增离线/取消、损坏包、来源与路径限制、失败回退、旧文件清理及真实程序启动验证。v1.3 增加白名单身份与地址限制、旧收藏迁移、离线搜索和两路官方 HLS 原生播放检查。GitHub Actions 检查白名单与播放恢复、Windows 构建、隔离设置与安装、更新包完整性及回退；图形桌面和实时电台测试在本地执行。
+
+## 许可证
+
+本项目原创代码采用 [MIT 许可证](LICENSE)，版权归属为 Copyright (c) 2026 wangdut。允许商业使用、修改和分发，须保留版权声明和完整许可文本；软件按“原样”提供，不作担保。
+
+第三方依赖继续适用各自许可证，详见 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)。电台音频、节目及音乐作品的权利归相应权利人，项目的 MIT 许可不授予这些内容的转播或再分发权。
 
 ## 反馈与致谢
 

@@ -28,6 +28,7 @@ Copy-Item docs\USER_GUIDE.md dist\README.md -Force
 Copy-Item docs\RADIO_ALLOWLIST.md dist\电台白名单说明.md -Force
 Copy-Item RELEASE-NOTES.md -Destination dist -Force
 Copy-Item THIRD-PARTY-NOTICES.txt dist\THIRD-PARTY-NOTICES.txt -Force
+Copy-Item LICENSE dist\LICENSE.txt -Force
 New-Item -ItemType Directory -Path dist\licenses -Force | Out-Null
 Copy-Item node_modules\three\LICENSE dist\licenses\three-MIT.txt -Force
 Copy-Item "$packagePath\LICENSE.txt" dist\licenses\WebView2-LICENSE.txt -Force
@@ -37,6 +38,6 @@ Write-Output 'Built dist\Nexus.exe and dist\Nexus.scr (Windows x64)'
 Copy-Item node_modules\hls.js\LICENSE dist\licenses\hls.js-LICENSE.txt -Force
 
 # Explicit manifest excludes test profiles and obsolete build output.
-$names=@('Nexus.exe','Nexus.scr','Nexus.exe.config','Nexus.scr.config','Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll','WebView2Loader.dll','nexus.ico','Install.ps1','Uninstall.ps1','Deployment.ps1','ApplyUpdate.ps1','Install.cmd','Uninstall.cmd','Launch.cmd','README.md','使用说明.md','电台白名单说明.md','RELEASE-NOTES.md','THIRD-PARTY-NOTICES.txt','web/index.html','web/app.js','web/style.css','web/radio.css','web/nexus.ico','licenses/three-MIT.txt','licenses/WebView2-LICENSE.txt','licenses/WebView2-NOTICE.txt','licenses/hls.js-LICENSE.txt')
+$names=@('Nexus.exe','Nexus.scr','Nexus.exe.config','Nexus.scr.config','Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll','WebView2Loader.dll','nexus.ico','Install.ps1','Uninstall.ps1','Deployment.ps1','ApplyUpdate.ps1','Install.cmd','Uninstall.cmd','Launch.cmd','README.md','使用说明.md','电台白名单说明.md','RELEASE-NOTES.md','LICENSE.txt','THIRD-PARTY-NOTICES.txt','web/index.html','web/app.js','web/style.css','web/radio.css','web/nexus.ico','licenses/three-MIT.txt','licenses/WebView2-LICENSE.txt','licenses/WebView2-NOTICE.txt','licenses/hls.js-LICENSE.txt')
 $entries=@($names|ForEach-Object{@{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path 'dist' $_) -Algorithm SHA256).Hash}})
 @{product='NexusScreensaver';version=(Get-Content -Raw package.json|ConvertFrom-Json).version;files=$entries}|ConvertTo-Json -Depth 4|Set-Content -Encoding UTF8 dist\manifest.json

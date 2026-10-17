@@ -2,6 +2,7 @@
   "name": "nexus-screensaver",
   "version": "1.3.0",
   "private": true,
+  "license": "MIT",
   "description": "Interactive Windows particle screensaver with tray settings and optional internet radio",
   "scripts": {
     "build:web": "esbuild web/main.js --bundle --minify --format=iife --outfile=dist/web/app.js && node scripts/copy-web.mjs",

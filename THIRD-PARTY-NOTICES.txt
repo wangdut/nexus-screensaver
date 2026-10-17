@@ -1,3 +1,8 @@
+NEXUS original code is distributed under the MIT License.
+See LICENSE in the source tree or LICENSE.txt in Windows distributions.
+Third-party components retain their own licenses. The project's MIT License
+does not grant rights to broadcaster audio, programming or music works.
+
 NEXUS uses Three.js r170 (MIT) and Microsoft Edge WebView2 SDK 1.0.2903.40.
 NEXUS also uses hls.js 1.6.13 (Apache-2.0) for HLS radio playback.
 hls.js: https://github.com/video-dev/hls.js/tree/v1.6.13
